@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-background: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+  --font-syne: var(--font-syne), ui-sans-serif, system-ui;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
+  /* LIGHT MODE (Default) */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #F8F9FA;
+    --surface: #FFFFFF;
+    --border: #E2E4E9;
+    --primary: #080A0F;
+    --muted: #6B7280;
+    --faint: #9CA3AF;
+  }
+
+  /* DARK MODE */
+  .dark {
+    --bg: #080A0F;
+    --surface: #0D1117;
+    --border: #1A1F2E;
+    --primary: #EDEDEA;
+    --muted: #4B5260;
+    --faint: #2A2F3A;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    font-family: var(--font-sans);
+    line-height: 1.75;
+    @apply antialiased overflow-x-hidden;
+  }
+  
+  h1, h2 {
+    font-family: var(--font-syne);
+    font-weight: 700;
+    letter-spacing: -0.03em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .glass {
+    @apply bg-surface border border-[color:var(--color-border)];
+  }
+  
+  .glass-panel {
+    @apply bg-surface border border-[color:var(--color-border)];
+  }
+
+  /* Typography utilities mapped to strictly monochrome setup */
+  .text-glow {
+    /* Removed */
+  }
+}
+
+/* Animations */
+@keyframes infinite-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 30s linear infinite;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }

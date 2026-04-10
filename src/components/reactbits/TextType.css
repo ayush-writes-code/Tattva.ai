@@ -1,0 +1,16 @@
+.text-type {
+  display: inline-block;
+}
+
+.text-type__content {
+  display: inline;
+}
+
+.text-type__cursor {
+  display: inline-block;
+  opacity: 1;
+}
+
+.text-type__cursor--hidden {
+  opacity: 0 !important;
+}

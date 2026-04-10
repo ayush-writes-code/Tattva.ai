@@ -1,65 +1,163 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Hero from "@/components/sections/Hero";
+import StatsBar from "@/components/StatsBar";
+import HowItWorks from "@/components/sections/HowItWorks";
+import UploadZone from "@/components/sections/UploadZone";
+import ResultsPanel from "@/components/sections/ResultsPanel";
+import BatchUpload from "@/components/sections/BatchUpload";
+import ProcessingTimeline from "@/components/sections/ProcessingTimeline";
+import TrustBadge from "@/components/sections/TrustBadge";
+import TechStack from "@/components/sections/TechStack";
+import MetricsChart from "@/components/sections/MetricsChart";
+import AIFraudMap from "@/components/sections/AIFraudMap";
+import DecryptedText from "@/components/reactbits/DecryptedText";
+import ShapeGrid from "@/components/reactbits/ShapeGrid";
+import { detectMedia, getForensics, DetectionResponse, ForensicsData } from "@/lib/api";
+
+const VerificationSection = ({
+  onFileSelect,
+  isProcessing,
+  result,
+  forensics,
+  uploadedFile,
+}: {
+  onFileSelect: (file: File) => Promise<void>;
+  isProcessing: boolean;
+  result: DetectionResponse | null;
+  forensics: ForensicsData;
+  uploadedFile: File | null;
+}) => {
+  return (
+    <section id="upload" className="relative w-full flex flex-col items-center overflow-hidden py-[140px] px-[48px]">
+      {/* ShapeGrid Background */}
+      <div className="absolute inset-0 z-0 opacity-25 pointer-events-none">
+        <ShapeGrid
+          shape="square"
+          borderColor="#3A3F4E"
+          hoverFillColor="#EDEDEA"
+          speed={0.2}
+          squareSize={40}
+        />
+      </div>
+
+      <div className="relative z-10 w-full flex flex-col items-center">
+        <div className="text-center mb-[60px]">
+          <p className="text-[10px] text-muted uppercase tracking-[0.1em] mb-[20px]">
+            <DecryptedText text="Detection" speed={60} maxIterations={15} animateOn="hover" />
+          </p>
+          <h2 className="text-4xl md:text-5xl text-primary">
+            <DecryptedText text="Verify Your Media" speed={60} maxIterations={15} animateOn="hover" />
+          </h2>
+        </div>
+
+        <UploadZone onFileSelect={onFileSelect} isProcessing={isProcessing} />
+
+        {/* Trust Badge — below upload zone */}
+        {!isProcessing && !result && <TrustBadge />}
+
+        {isProcessing && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="w-full"
+          >
+            <ProcessingTimeline />
+          </motion.div>
+        )}
+
+        <div id="results" className="w-full">
+          {!isProcessing && result && <ResultsPanel result={result} forensics={forensics} uploadedFile={uploadedFile} />}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export default function Home() {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [result, setResult] = useState<DetectionResponse | null>(null);
+  const [forensics, setForensics] = useState<ForensicsData>({});
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [mode, setMode] = useState<"single" | "batch">("single");
+
+  const handleFileUpload = async (file: File) => {
+    setIsProcessing(true);
+    setResult(null);
+    setForensics({});
+    setUploadedFile(file);
+
+    try {
+      // Run detection and forensics generation in parallel
+      const [response, forensicData] = await Promise.all([
+        detectMedia(file),
+        getForensics(file),
+      ]);
+
+      setResult(response);
+      setForensics(forensicData);
+    } catch (error) {
+      console.error(error);
+      setResult({
+        media_type: "unknown",
+        verdict: "ERROR",
+        confidence: 0,
+        details: { analysis: ["Processing failed. Please check the backend connection."] },
+      });
+    } finally {
+      setIsProcessing(false);
+      setTimeout(() => {
+        document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex flex-col w-full overflow-x-hidden relative">
+      <Hero />
+      <StatsBar />
+      <HowItWorks />
+      
+      {/* Mode Switcher */}
+      <div className="w-full flex justify-center pt-12 pb-4 bg-background z-20">
+        <div className="inline-flex items-center p-1 bg-surface border border-border rounded-full">
+          <button
+            onClick={() => setMode("single")}
+            className={`px-6 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
+              mode === "single" ? "bg-[#EDEDEA] text-[#080A0F]" : "text-muted hover:text-primary"
+            }`}
+          >
+            Single File Analysis
+          </button>
+          <button
+            onClick={() => setMode("batch")}
+            className={`px-6 py-2 rounded-full text-sm font-medium tracking-wide transition-all ${
+              mode === "batch" ? "bg-[#EDEDEA] text-[#080A0F]" : "text-muted hover:text-primary"
+            }`}
+          >
+            Batch Analysis
+          </button>
+        </div>
+      </div>
+
+      {mode === "single" ? (
+        <VerificationSection
+          onFileSelect={handleFileUpload}
+          isProcessing={isProcessing}
+          result={result}
+          forensics={forensics}
+          uploadedFile={uploadedFile}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      ) : (
+        <BatchUpload />
+      )}
+      
+      <TechStack />
+      <MetricsChart />
+      <AIFraudMap />
     </div>
   );
 }

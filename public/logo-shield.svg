@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <path d="M256 32L64 128v128c0 106 82.6 205.2 192 240 109.4-34.8 192-134 192-240V128L256 32z" fill="white" stroke="none"/>
+  <path d="M256 80l-152 76v102c0 84 65.4 163 152 191 86.6-28 152-107 152-191V156L256 80z" fill="black" stroke="none"/>
+  <path d="M256 120l-120 60v82c0 67 51.6 130 120 152 68.4-22 120-85 120-152v-82L256 120z" fill="white" stroke="none"/>
+  <text x="256" y="300" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="120" fill="black">IX</text>
+</svg>
