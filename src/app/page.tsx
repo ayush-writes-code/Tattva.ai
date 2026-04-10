@@ -12,7 +12,7 @@ import ProcessingTimeline from "@/components/sections/ProcessingTimeline";
 import TrustBadge from "@/components/sections/TrustBadge";
 import TechStack from "@/components/sections/TechStack";
 import MetricsChart from "@/components/sections/MetricsChart";
-import AIFraudMap from "@/components/sections/AIFraudMap";
+import CTASection from "@/components/sections/CTASection";
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import ShapeGrid from "@/components/reactbits/ShapeGrid";
 import { detectMedia, getForensics, DetectionResponse, ForensicsData } from "@/lib/api";
@@ -157,7 +157,7 @@ export default function Home() {
       
       <TechStack />
       <MetricsChart />
-      <AIFraudMap />
+      <CTASection />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = "http://localhost:8000";
 
 export interface AiInsight {
   category: string;
@@ -56,9 +56,6 @@ export interface ForensicsData {
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Bypass-Tunnel-Reminder": "true",
-  }
 });
 
 export const detectMedia = async (file: File): Promise<DetectionResponse> => {

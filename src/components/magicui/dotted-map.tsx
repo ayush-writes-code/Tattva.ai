@@ -53,17 +53,12 @@ export function DottedMap<M extends Marker = Marker>({
   style,
   ...svgProps
 }: DottedMapProps<M>) {
-  const { points, processedMarkers } = React.useMemo(() => {
-    const map = createMap({
-      width,
-      height,
-      mapSamples,
-    })
-    return {
-      points: map.points,
-      processedMarkers: map.addMarkers(markers),
-    }
-  }, [width, height, mapSamples, markers])
+  const { points, addMarkers } = createMap({
+    width,
+    height,
+    mapSamples,
+  })
+  const processedMarkers = addMarkers(markers)
 
   // Compute stagger helpers in a single, simple pass
   const { xStep, yToRowIndex } = React.useMemo(() => {

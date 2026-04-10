@@ -92,7 +92,7 @@ export default function IntrusionXNavbar() {
           <span className="hidden sm:inline">GitHub Repo</span>
         </span>
       ),
-      href: "https://github.com/ayushtomar",
+      href: "https://github.com/ayush-writes-code/intrusionx-se",
     },
   ];
 
