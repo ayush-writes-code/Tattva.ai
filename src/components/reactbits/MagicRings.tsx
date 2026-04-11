@@ -89,6 +89,28 @@ interface MagicRingsProps {
   clickBurst?: boolean;
 }
 
+const resolveColor = (color: string): string => {
+  if (typeof window === 'undefined') return '#000000';
+  if (color.startsWith('var(')) {
+    const temp = document.createElement('div');
+    temp.style.color = color;
+    document.body.appendChild(temp);
+    const computed = getComputedStyle(temp).color;
+    document.body.removeChild(temp);
+    
+    // Parse rgb(r, g, b) or rgba(r, g, b, a) to hex
+    const match = computed.match(/\d+/g);
+    if (match) {
+      const r = parseInt(match[0]);
+      const g = parseInt(match[1]);
+      const b = parseInt(match[2]);
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+    return '#000000';
+  }
+  return color;
+};
+
 export default function MagicRings({
   color = '#fc42ff',
   colorTwo = '#42fcff',
@@ -120,8 +142,14 @@ export default function MagicRings({
   const isHoveredRef = useRef(false);
   const burstRef = useRef(0);
 
+  // Pre-resolve colors to ensure WebGL gets valid strings
+  const resolvedColor = resolveColor(color);
+  const resolvedColorTwo = resolveColor(colorTwo);
+
   propsRef.current = {
-    color, colorTwo, speed, ringCount, attenuation, lineThickness,
+    color: resolvedColor, 
+    colorTwo: resolvedColorTwo, 
+    speed, ringCount, attenuation, lineThickness,
     baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount,
     rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence,
     hoverScale, parallax, clickBurst,

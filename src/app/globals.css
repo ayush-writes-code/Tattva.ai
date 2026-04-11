@@ -17,20 +17,20 @@
   :root {
     --bg: #F8F9FA;
     --surface: #FFFFFF;
-    --border: #E2E4E9;
-    --primary: #080A0F;
-    --muted: #6B7280;
-    --faint: #9CA3AF;
+    --border: #E5E5E5;
+    --primary: #000000;
+    --muted: #666666;
+    --faint: #999999;
   }
 
   /* DARK MODE */
   .dark {
-    --bg: #080A0F;
-    --surface: #0D1117;
-    --border: #1A1F2E;
-    --primary: #EDEDEA;
-    --muted: #4B5260;
-    --faint: #2A2F3A;
+    --bg: #000000;
+    --surface: #0A0A0A;
+    --border: #1A1A1A;
+    --primary: #FFFFFF;
+    --muted: #888888;
+    --faint: #333333;
   }
 
   body {

@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Eye, AudioLines, Search } from "lucide-react";
 import DecryptedText from "@/components/reactbits/DecryptedText";
-import ShapeGrid from "@/components/reactbits/ShapeGrid";
+import Radar from "@/components/reactbits/Radar";
 import BorderGlow from "@/components/reactbits/BorderGlow";
 
 const MODELS = [
@@ -48,14 +48,17 @@ export default function TechStack() {
       className="relative w-full overflow-hidden" 
       style={{ visibility: "hidden" }}
     >
-      {/* ShapeGrid Background */}
-      <div className="absolute inset-0 z-0 opacity-25 pointer-events-none">
-        <ShapeGrid 
-          shape="circle"
-          borderColor="#3A3F4E"
-          hoverFillColor="#EDEDEA"
-          speed={0.3}
-          squareSize={60}
+      {/* Tactical Radar Background */}
+      <div className="absolute inset-0 z-0 opacity-20 mix-blend-screen pointer-events-none transform scale-[1.3] md:scale-[1.8]">
+        <Radar 
+          color="#FFFFFF"
+          backgroundColor="#000000"
+          scale={0.5}
+          ringCount={8}
+          spokeCount={12}
+          sweepSpeed={1.0}
+          brightness={0.8}
+          enableMouseInteraction={true}
         />
       </div>
 
@@ -75,8 +78,8 @@ export default function TechStack() {
               key={model.name}
               className="h-full"
               animated={true}
-              glowColor="186 100% 74%"
-              backgroundColor="#080A0F"
+              glowColor="0 0% 93%"
+              backgroundColor="transparent"
               borderRadius={0}
               glowRadius={30}
               glowIntensity={0.6}

@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Activity, ShieldCheck, Zap } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import DecryptedText from "@/components/reactbits/DecryptedText";
-import ShapeGrid from "@/components/reactbits/ShapeGrid";
+import Grainient from "@/components/reactbits/Grainient";
 
 const DATA = [
   { name: "ViT Core", accuracy: 98.5 },
@@ -21,18 +21,32 @@ export default function MetricsDashboard() {
 
   return (
     <section 
+      id="telemetry"
       ref={sectionRef} 
       className="relative w-full overflow-hidden border-t border-border" 
       style={{ visibility: "hidden" }}
     >
-      {/* ShapeGrid Background */}
-      <div className="absolute inset-0 z-0 opacity-25 pointer-events-none">
-        <ShapeGrid 
-          shape="triangle"
-          borderColor="#3A3F4E"
-          hoverFillColor="#EDEDEA"
-          speed={0.4}
-          squareSize={50}
+      {/* Grainient Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Grainient
+          color1="#1A1A1A"
+          color2="#333333"
+          color3="#000000"
+          timeSpeed={0.15}
+          warpStrength={0.8}
+          warpFrequency={4.0}
+          warpSpeed={1.5}
+          warpAmplitude={60.0}
+          grainAmount={0.06}
+          grainScale={2.5}
+          grainAnimated={true}
+          contrast={1.3}
+          saturation={0.0}
+          gamma={1.1}
+          zoom={1.0}
+          blendAngle={30.0}
+          blendSoftness={0.15}
+          rotationAmount={200}
         />
       </div>
 
@@ -82,7 +96,7 @@ export default function MetricsDashboard() {
                     contentStyle={{ backgroundColor: '#0D1117', border: '1px solid #4B5260', borderRadius: '0', color: '#EDEDEA' }}
                     itemStyle={{ color: '#EDEDEA' }}
                   />
-                  <Bar dataKey="accuracy" fill="#EDEDEA" radius={[0, 4, 4, 0]} barSize={24} />
+                  <Bar dataKey="accuracy" fill="#FF0000" radius={[0, 4, 4, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

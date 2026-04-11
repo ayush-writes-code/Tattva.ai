@@ -270,7 +270,28 @@ function processImage(img: HTMLImageElement): ImageData {
 }
 
 function hexToRgb(hex: string): [number, number, number] {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (typeof window === 'undefined') return [1, 1, 1];
+  
+  let targetHex = hex;
+  if (hex.startsWith('var(')) {
+    const temp = document.createElement('div');
+    temp.style.color = hex;
+    document.body.appendChild(temp);
+    const computed = getComputedStyle(temp).color;
+    document.body.removeChild(temp);
+    
+    const match = computed.match(/\d+/g);
+    if (match) {
+      const r = parseInt(match[0]);
+      const g = parseInt(match[1]);
+      const b = parseInt(match[2]);
+      targetHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    } else {
+      targetHex = '#000000';
+    }
+  }
+
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(targetHex);
   return result
     ? [parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255]
     : [1, 1, 1];

@@ -236,6 +236,11 @@ const PillNav: React.FC<PillNavProps> = ({
     href.startsWith('tel:') ||
     href.startsWith('#');
 
+  const isNewTabLink = (href: string) =>
+    href.startsWith('http://') ||
+    href.startsWith('https://') ||
+    href.startsWith('//');
+
   const isRouterLink = (href?: string) => href && !isExternalLink(href);
 
   const cssVars = {
@@ -310,6 +315,7 @@ const PillNav: React.FC<PillNavProps> = ({
                     aria-label={item.ariaLabel || item.label}
                     onMouseEnter={() => handleEnter(i)}
                     onMouseLeave={() => handleLeave(i)}
+                    {...(isNewTabLink(item.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
                     <span
                       className="hover-circle"
@@ -359,6 +365,7 @@ const PillNav: React.FC<PillNavProps> = ({
                   href={item.href}
                   className={`mobile-menu-link${activeHref === item.href ? ' is-active' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
+                  {...(isNewTabLink(item.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 >
                   {item.label}
                 </a>

@@ -210,18 +210,31 @@ const ExifIntegrityCard = ({ metadata, fileInfo }: { metadata: any; fileInfo: an
     fields.push({ label: "File Size", value: `${(fileInfo.size_bytes / 1024 / 1024).toFixed(2)} MB`, status: "ok" });
   }
   if (metadata) {
-    if (metadata.software) {
-      const isEdited = /photoshop|gimp|lightroom|canva/i.test(metadata.software);
-      fields.push({ label: "Software", value: metadata.software, status: isEdited ? "warn" : "ok" });
+    if (metadata.risk_score !== undefined) {
+      const risk = metadata.risk_score;
+      fields.push({ label: "Metadata Risk Score", value: `${risk}/100`, status: risk > 40 ? "error" : risk > 15 ? "warn" : "ok" });
     }
-    if (metadata.camera_model) {
-      fields.push({ label: "Camera Model", value: metadata.camera_model, status: "ok" });
+    
+    if (metadata.has_exif !== undefined) {
+      fields.push({ label: "EXIF Structure", value: metadata.has_exif ? "PRESENT" : "MISSING/STRIPPED", status: metadata.has_exif ? "ok" : "warn" });
     }
-    if (metadata.ai_indicators) {
-      const hasAI = metadata.ai_indicators.length > 0;
-      fields.push({ label: "AI Signatures", value: hasAI ? `${metadata.ai_indicators.length} DETECTED` : "CLEAR", status: hasAI ? "error" : "ok" });
+
+    if (metadata.ai_indicators && metadata.ai_indicators.length > 0) {
       metadata.ai_indicators.forEach((indicator: string) => {
         fields.push({ label: "⚠ AI Indicator", value: indicator, status: "error" });
+      });
+    }
+
+    if (metadata.details && metadata.details.length > 0) {
+      metadata.details.forEach((detail: string) => {
+        // Skip some details if they are just repeating what we already have
+        if (detail.includes("Found") && detail.includes("metadata fields")) return;
+        
+        fields.push({ 
+          label: "Insight", 
+          value: detail.replace("🚨", "").replace("📋", "").replace("📌", "").trim(), 
+          status: detail.includes("🚨") || detail.includes("suspicious") || detail.includes("AI") ? "error" : "warn" 
+        });
       });
     }
   }

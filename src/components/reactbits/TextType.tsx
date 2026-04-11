@@ -171,16 +171,28 @@ const TextType = ({
   const shouldHideCursor =
     hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
 
-  return createElement(
-    Component,
-    {
-      ref: containerRef,
-      className: `text-type ${className}`,
-      ...props
-    },
-    <span className="text-type__content" style={{ color: getCurrentTextColor() || 'inherit' }}>
-      {displayedText}
-    </span>,
+    const highlightedText = useMemo(() => {
+      let result = displayedText;
+      const wordsToColor = ["authentic", "secure", "AI", "spot", "synthetic"];
+      wordsToColor.forEach(word => {
+        const regex = new RegExp(`\\b(${word})\\b`, 'gi');
+        result = result.replace(regex, '<span style="color: #FF0000;">$1</span>');
+      });
+      return result;
+    }, [displayedText]);
+
+    return createElement(
+      Component,
+      {
+        ref: containerRef,
+        className: `text-type ${className}`,
+        ...props
+      },
+      <span 
+        className="text-type__content" 
+        style={{ color: getCurrentTextColor() || 'inherit' }}
+        dangerouslySetInnerHTML={{ __html: highlightedText }}
+      />,
     showCursor && (
       <span
         ref={cursorRef}
