@@ -24,7 +24,6 @@ export default function MetricsDashboard() {
       id="telemetry"
       ref={sectionRef} 
       className="relative w-full overflow-hidden border-t border-border" 
-      style={{ visibility: "hidden" }}
     >
       {/* Grainient Background */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -85,8 +84,8 @@ export default function MetricsDashboard() {
               </h3>
               <Activity className="w-4 h-4 text-primary" />
             </div>
-            <div className="flex-1">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="flex-1 min-h-[200px]">
+              <ResponsiveContainer width="100%" height="100%" minHeight={200}>
                 <BarChart data={DATA} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#4B5260" />
                   <XAxis type="number" domain={[80, 100]} stroke="#EDEDEA" fontSize={12} />

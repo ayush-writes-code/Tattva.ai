@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Syne } from "next/font/google";
 import "./globals.css";
-import TattvaNavbar from "@/components/layout/TattvaNavbar";
+import IntrusionXNavbar from "@/components/layout/IntrusionXNavbar";
 import Footer from "@/components/layout/Footer";
 import SmoothScrollProvider from "@/providers/SmoothScrollProvider";
 import BlobCursor from "@/components/reactbits/BlobCursor";
@@ -18,7 +18,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Tattva.AI | Deepfake Detection",
+  title: "IntrusionX SE | Deepfake Detection",
   description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
 };
 
@@ -36,7 +36,7 @@ export default function RootLayout({
           opacities={[0.9, 0.4, 0.35]}
         />
         <SmoothScrollProvider>
-          <TattvaNavbar />
+          <IntrusionXNavbar />
           <div className="flex-1 mt-20">
             {children}
           </div>

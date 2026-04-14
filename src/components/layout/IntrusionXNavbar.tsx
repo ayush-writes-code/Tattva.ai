@@ -18,7 +18,7 @@ const MetallicPaint = dynamic(
   }
 );
 
-export default function TattvaNavbar() {
+export default function IntrusionXNavbar() {
   const [activeSegment, setActiveSegment] = useState("/");
   const [hidden, setHidden] = useState(false);
   const { scrollY } = useScroll();
@@ -92,7 +92,7 @@ export default function TattvaNavbar() {
           <span className="hidden sm:inline">GitHub Repo</span>
         </span>
       ),
-      href: "https://github.com/ayush-writes-code/tattva-ai",
+      href: "https://github.com/ayush-writes-code/intrusionx-se",
     },
   ];
 

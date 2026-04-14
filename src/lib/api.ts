@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Automatically falls back to localhost if the Vercel API URL is not set
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface AiInsight {
@@ -30,9 +29,22 @@ export interface DetectionResponse {
   verdict: "AUTHENTIC" | "SUSPICIOUS" | "DEEPFAKE" | "ERROR";
   confidence: number;
   details: {
-    detection?: any;
-    metadata?: any;
-    frame_results?: any[];
+    detection?: {
+      label: string;
+      probs: { [key: string]: number };
+      models_used: string[];
+      face_detected: boolean;
+      ela_score: number;
+      analysis: string[];
+    };
+    metadata?: {
+      has_exif: boolean;
+      risk_score: number;
+      ai_indicators: string[];
+      details: string[];
+      exif_data?: { [key: string]: string };
+    };
+    frame_results?: SuspiciousFrame[];
     analysis?: string[];
     ai_insights?: AiInsightsData;
     [key: string]: any;
@@ -113,7 +125,9 @@ export const generateReport = async (file: File): Promise<ReportResponse> => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await apiClient.post<ReportResponse>("/generate-report", formData);
+  const response = await apiClient.post<ReportResponse>("/generate-report", formData, {
+    timeout: 120000, // 2 minutes — report gen re-runs full pipeline + PDF
+  });
   return response.data;
 };
 

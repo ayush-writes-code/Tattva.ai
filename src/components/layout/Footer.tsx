@@ -16,7 +16,7 @@ export default function Footer() {
                 <Shield className="w-5 h-5 text-primary" />
               </div>
               <span className="text-lg tracking-tight text-primary">
-                <DecryptedText text="Tattva.AI" speed={60} maxIterations={15} animateOn="hover" />
+                <DecryptedText text="IntrusionXSE" speed={60} maxIterations={15} animateOn="hover" />
               </span>
             </div>
             <p className="text-muted text-sm leading-relaxed max-w-sm">
@@ -53,7 +53,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 pt-[40px] border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-faint text-xs">
-            <DecryptedText text={`© ${new Date().getFullYear()} Tattva.AI. Built for digital integrity.`} speed={60} maxIterations={15} animateOn="hover" />
+            <DecryptedText text={`© ${new Date().getFullYear()} IntrusionX SE. Built for digital integrity.`} speed={60} maxIterations={15} animateOn="hover" />
           </p>
           <div className="flex gap-6">
             <a href="https://github.com" target="_blank" rel="noreferrer" className="text-faint text-xs hover:text-muted transition-colors">

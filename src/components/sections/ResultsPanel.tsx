@@ -337,8 +337,9 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
                       const report = await generateReport(uploadedFile);
                       const url = getReportDownloadUrl(report.download_url);
                       window.open(url, "_blank");
-                    } catch (err) {
+                    } catch (err: any) {
                       console.error("Report generation failed:", err);
+                      alert(`Report generation failed: ${err?.message || "Unknown error. Check if backend is running."}`);
                     } finally {
                       setIsGeneratingReport(false);
                     }
