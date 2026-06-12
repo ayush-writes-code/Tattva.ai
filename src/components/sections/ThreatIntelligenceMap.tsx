@@ -34,7 +34,7 @@ const fraudData: FraudData[] = [
 ];
 
 export default function ThreatIntelligenceMap() {
-  const [hoveredMarker, setHoveredMarker] = useState<FraudData | null>(null);
+  const [hoveredMarker, setHoveredMarker] = useState<(FraudData & { x: number; y: number }) | null>(null);
 
   const markers = useMemo(() => {
     return fraudData.map((data) => ({
