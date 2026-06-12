@@ -78,7 +78,7 @@ export const detectMedia = async (file: File, signal?: AbortSignal): Promise<Det
     formData.append("file", file);
 
     const response = await apiClient.post<DetectionResponse>("/detect/full", formData, {
-      signal,
+      ...(signal && { signal: signal as any }),
       timeout: 120000,
     });
     return response.data;
@@ -98,7 +98,7 @@ export const getHeatmap = async (file: File, signal?: AbortSignal): Promise<stri
     formData.append("file", file);
 
     const response = await apiClient.post("/detect/heatmap", formData, {
-      signal,
+      ...(signal && { signal: signal as any }),
       timeout: 60000,
     });
     return response.data.heatmap || null;
@@ -172,7 +172,7 @@ export const detectBatch = async (files: File[], signal?: AbortSignal): Promise<
     }
 
     const response = await apiClient.post<BatchResponse>("/detect/batch", formData, {
-      signal,
+      ...(signal && { signal: signal as any }),
       timeout: 300000, // 5 minutes for batch
     });
     return response.data;
