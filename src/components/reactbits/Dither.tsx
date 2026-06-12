@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, forwardRef, memo } from 'react';
 import { Canvas, useFrame, useThree, ThreeEvent } from '@react-three/fiber';
+import { useInView, useReducedMotion } from 'framer-motion';
 import { EffectComposer, wrapEffect } from '@react-three/postprocessing';
 import { Effect } from 'postprocessing';
 import * as THREE from 'three';
@@ -157,9 +158,10 @@ class RetroEffectImpl extends Effect {
   }
 }
 
+const WrappedRetroEffect = wrapEffect(RetroEffectImpl);
+
 const RetroEffect = forwardRef<RetroEffectImpl, { colorNum: number; pixelSize: number }>((props, ref) => {
   const { colorNum, pixelSize } = props;
-  const WrappedRetroEffect = wrapEffect(RetroEffectImpl);
   return <WrappedRetroEffect ref={ref} colorNum={colorNum} pixelSize={pixelSize} />;
 });
 
@@ -232,12 +234,7 @@ function DitheredWaves({
     const u = waveUniformsRef.current;
 
     if (!disableAnimation) {
-      if (state && state.clock && typeof state.clock.getElapsedTime === 'function') {
-        u.time.value = state.clock.getElapsedTime();
-      } else {
-        // Fallback for R3F v9 alpha where clock might be handled differently
-        u.time.value += delta;
-      }
+      u.time.value = state.clock.getElapsedTime();
     }
 
     if (u.waveSpeed.value !== waveSpeed) u.waveSpeed.value = waveSpeed;
@@ -304,7 +301,7 @@ interface DitherProps {
   mouseRadius?: number;
 }
 
-export default memo(function Dither({
+export default function Dither({
   waveSpeed = 0.05,
   waveFrequency = 3,
   waveAmplitude = 0.3,
@@ -315,24 +312,33 @@ export default memo(function Dither({
   enableMouseInteraction = true,
   mouseRadius = 1
 }: DitherProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { margin: "200px" });
+  const shouldReduceMotion = useReducedMotion();
+
+  const effectiveDisableAnimation = disableAnimation || shouldReduceMotion;
+
   return (
-    <Canvas
-      className="absolute inset-0 w-full h-full pointer-events-auto mix-blend-screen"
-      camera={{ position: [0, 0, 6] }}
-      dpr={1}
-      gl={{ antialias: true, preserveDrawingBuffer: false }}
-    >
-      <DitheredWaves
-        waveSpeed={waveSpeed}
-        waveFrequency={waveFrequency}
-        waveAmplitude={waveAmplitude}
-        waveColor={waveColor}
-        colorNum={colorNum}
-        pixelSize={pixelSize}
-        disableAnimation={disableAnimation}
-        enableMouseInteraction={enableMouseInteraction}
-        mouseRadius={mouseRadius}
-      />
-    </Canvas>
+    <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-auto mix-blend-screen">
+      {isInView && (
+        <Canvas
+          camera={{ position: [0, 0, 6] }}
+          dpr={1}
+          gl={{ antialias: true, preserveDrawingBuffer: false }}
+        >
+          <DitheredWaves
+            waveSpeed={waveSpeed}
+            waveFrequency={waveFrequency}
+            waveAmplitude={waveAmplitude}
+            waveColor={waveColor}
+            colorNum={colorNum}
+            pixelSize={pixelSize}
+            disableAnimation={effectiveDisableAnimation}
+            enableMouseInteraction={enableMouseInteraction}
+            mouseRadius={mouseRadius}
+          />
+        </Canvas>
+      )}
+    </div>
   );
-})
+}

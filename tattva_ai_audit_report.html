@@ -1,0 +1,460 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary);background:transparent}
+.audit-header{padding:1.5rem 0 1rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem}
+.audit-title{font-size:20px;font-weight:500;margin-bottom:4px}
+.audit-sub{font-size:13px;color:var(--color-text-secondary)}
+.score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.score-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.score-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;letter-spacing:.03em}
+.score-val{font-size:22px;font-weight:500}
+.score-val.red{color:#A32D2D}.score-val.amber{color:#854F0B}.score-val.green{color:#3B6D11}.score-val.blue{color:#185FA5}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.filter-btn{background:transparent;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:5px 12px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);transition:all .15s}
+.filter-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.issue-list{display:flex;flex-direction:column;gap:8px}
+.issue-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);background:var(--color-background-primary);overflow:hidden;cursor:pointer;transition:border-color .15s}
+.issue-card:hover{border-color:var(--color-border-secondary)}
+.issue-header{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.sev-badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px;flex-shrink:0;letter-spacing:.04em}
+.sev-critical{background:#FCEBEB;color:#A32D2D}
+.sev-high{background:#FAEEDA;color:#854F0B}
+.sev-medium{background:#E6F1FB;color:#185FA5}
+.sev-low{background:#EAF3DE;color:#3B6D11}
+.dark .sev-critical{background:#501313;color:#F7C1C1}
+.dark .sev-high{background:#412402;color:#FAC775}
+.dark .sev-medium{background:#042C53;color:#B5D4F4}
+.dark .sev-low{background:#173404;color:#C0DD97}
+.issue-title{font-size:13px;font-weight:500;flex:1}
+.issue-cat{font-size:11px;color:var(--color-text-secondary);flex-shrink:0}
+.issue-body{padding:0 14px 12px 14px;display:none;border-top:0.5px solid var(--color-border-tertiary);margin-top:0;padding-top:10px}
+.issue-body.open{display:block}
+.issue-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:8px}
+.issue-code{font-family:var(--font-mono);font-size:11px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 10px;margin:6px 0;line-height:1.6;white-space:pre-wrap;color:var(--color-text-primary)}
+.fix-label{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px;margin-top:8px}
+.expand-icon{font-size:14px;color:var(--color-text-secondary);transition:transform .15s;flex-shrink:0}
+.issue-card.expanded .expand-icon{transform:rotate(180deg)}
+.section-sep{font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.08em;padding:6px 0 4px;border-bottom:0.5px solid var(--color-border-tertiary);margin:1rem 0 8px;text-transform:uppercase}
+.count-badge{display:inline-block;font-size:10px;background:var(--color-background-secondary);border-radius:4px;padding:1px 5px;margin-left:5px;color:var(--color-text-secondary)}
+</style>
+
+<div class="audit-header">
+  <div class="audit-title">Tattva.ai (IntrusionX SE) — Code Audit</div>
+  <div class="audit-sub">Next.js 16 · React 19 · Three.js + OGL · FastAPI backend · 47 source files analyzed</div>
+</div>
+
+<div class="score-row">
+  <div class="score-card"><div class="score-label">Critical bugs</div><div class="score-val red">4</div></div>
+  <div class="score-card"><div class="score-label">High severity</div><div class="score-val amber">7</div></div>
+  <div class="score-card"><div class="score-label">Medium issues</div><div class="score-val blue">8</div></div>
+  <div class="score-card"><div class="score-label">Improvements</div><div class="score-val green">6</div></div>
+</div>
+
+<div class="filter-row">
+  <button class="filter-btn active" onclick="filter('all')">All <span class="count-badge">25</span></button>
+  <button class="filter-btn" onclick="filter('critical')">Critical</button>
+  <button class="filter-btn" onclick="filter('high')">High</button>
+  <button class="filter-btn" onclick="filter('medium')">Medium</button>
+  <button class="filter-btn" onclick="filter('perf')">Performance</button>
+  <button class="filter-btn" onclick="filter('bug')">Bugs</button>
+  <button class="filter-btn" onclick="filter('security')">Security</button>
+  <button class="filter-btn" onclick="filter('ux')">UX/A11y</button>
+</div>
+
+<div class="issue-list" id="list"></div>
+
+<script>
+const issues = [
+  {
+    id:1, sev:'critical', cat:'bug', title:'Lenis ticker cleanup leaks on every unmount',
+    desc:'SmoothScrollProvider registers a GSAP ticker callback with an inline arrow function, then tries to remove a different arrow function. JavaScript compares function references — the remove call creates a new closure, so it never matches. The original ticker callback runs forever after unmount, causing frame-rate degradation and potential crashes on hot reload.',
+    code:`// Current (broken) — two different function objects
+gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+return () => {
+  gsap.ticker.remove((time) => lenis.raf(time * 1000)); // ❌ never removed
+  lenis.destroy();
+};
+
+// Fix — store reference, remove the same one
+const tick = (time) => lenis.raf(time * 1000);
+gsap.ticker.add(tick);
+return () => { gsap.ticker.remove(tick); lenis.destroy(); };`,
+    fix:'Store the ticker callback in a variable before adding it, then pass the same variable to remove().'
+  },
+  {
+    id:2, sev:'critical', cat:'security', title:'dangerouslySetInnerHTML from backend data — XSS risk',
+    desc:'ResultsPanel renders analysis strings from the API response directly as HTML using dangerouslySetInnerHTML. If the backend ever forwards attacker-controlled content (e.g. a malicious filename or metadata field), arbitrary scripts can execute in the user\'s browser.',
+    code:`// ResultsPanel.tsx line 455 — unescaped backend string injected as HTML
+<span dangerouslySetInnerHTML={{
+  __html: item.replace(/\\*\\*(.*?)\\*\\*/g,
+    '<span class="text-primary font-medium">$1</span>'
+  )
+}} />
+
+// Fix — use a safe markdown-to-JSX approach
+const parts = item.split(/\\*\\*(.*?)\\*\\*/g);
+<span>{parts.map((p,i) => i%2===1
+  ? <strong key={i}>{p}</strong>
+  : p
+)}</span>`,
+    fix:'Parse the **bold** markers into React elements rather than HTML strings. If HTML is truly required, sanitize with DOMPurify before injecting.'
+  },
+  {
+    id:3, sev:'critical', cat:'bug', title:'5+ simultaneous WebGL/Canvas renderers — GPU thrash',
+    desc:'The page runs Dither (Three.js + R3F WebGL), MetallicPaint (WebGL2), Grainient (OGL WebGL), MagicRings (Canvas 2D), ShapeGrid (Canvas 2D), LetterGlitch (Canvas 2D), and Radar (Canvas 2D) all at once. Browsers cap WebGL contexts at 8–16 and each canvas runs its own rAF loop. On a mid-range device this causes dropped frames, thermal throttling, and CONTEXT_LOST_WEBGL errors. Most of these renderers also have no IntersectionObserver — they animate even when off-screen.',
+    code:`// No IntersectionObserver anywhere in Grainient, MagicRings, LetterGlitch, Radar
+// All run requestAnimationFrame unconditionally, even when 2000px off-screen
+
+// Fix — pause when not visible
+const observer = new IntersectionObserver(([e]) => {
+  e.isIntersecting ? startAnimation() : stopAnimation();
+}, { threshold: 0.05 });
+observer.observe(canvasRef.current);
+return () => observer.disconnect();`,
+    fix:'Add IntersectionObserver to every canvas/WebGL component. Lazy-load off-screen sections with next/dynamic. Consider replacing Grainient and MagicRings with CSS-only equivalents for background effects.'
+  },
+  {
+    id:4, sev:'critical', cat:'bug', title:'TypeScript and ESLint errors silenced in production builds',
+    desc:'next.config.ts sets ignoreBuildErrors: true and ignoreDuringBuilds: true. This means type errors and lint violations are invisible in CI/CD — broken API response types or unsafe casts ship without any warning. The codebase already has 14+ uses of : any, which the suppressed config is papering over.',
+    code:`// next.config.ts — currently
+typescript: { ignoreBuildErrors: true },
+eslint: { ignoreDuringBuilds: true },
+
+// Fix
+typescript: { ignoreBuildErrors: false },
+eslint: { ignoreDuringBuilds: false },
+// Then run: npx tsc --noEmit to see the real error list`,
+    fix:'Remove both ignore flags. Fix the underlying type errors, particularly the any types in ResultsPanel, ThreatIntelligenceMap, and the API layer.'
+  },
+  {
+    id:5, sev:'high', cat:'bug', title:'onDrop captures stale validateAndSelect closure',
+    desc:'In UploadZone, validateAndSelect is a plain function (not memoized) defined above the useCallback. The onDrop useCallback only lists [isProcessing] as a dependency, but it calls validateAndSelect — which captures setErrorMsg from the render closure. If setErrorMsg identity changes (it won\'t in React, but the dependency array is misleading and fragile for future refactoring).',
+    code:`// Current
+const validateAndSelect = (file: File) => { ... }; // new fn every render
+const onDrop = useCallback((e) => {
+  validateAndSelect(e.dataTransfer.files[0]); // captures outer scope
+}, [isProcessing]); // ← validateAndSelect not listed
+
+// Fix — inline or wrap validateAndSelect in useCallback too
+const validateAndSelect = useCallback((file: File) => {
+  setErrorMsg(null);
+  if (file.size > 100 * 1024 * 1024) { setErrorMsg("..."); return; }
+  onFileSelect(file);
+}, [onFileSelect]);`,
+    fix:'Wrap validateAndSelect in useCallback and add it to the onDrop dependency array, or inline the validation logic directly into onDrop.'
+  },
+  {
+    id:6, sev:'high', cat:'bug', title:'@react-three/fiber 10.0.0-alpha.2 — unstable alpha in production',
+    desc:'The Dither component (used on the hero — the most prominent element) depends on an alpha pre-release of R3F. Alpha packages have no stability guarantees. The Dither component already has a workaround comment for the alpha\'s broken clock API, suggesting known regressions are already present.',
+    code:`// package.json
+"@react-three/fiber": "^10.0.0-alpha.2"  // ❌ alpha in prod
+
+// Dither.tsx — already working around alpha bugs
+if (state && state.clock && typeof state.clock.getElapsedTime === 'function') {
+  u.time.value = state.clock.getElapsedTime();
+} else {
+  // Fallback for R3F v9 alpha where clock might be handled differently
+  u.time.value += delta; // ← sign of breakage
+}
+
+// Fix
+"@react-three/fiber": "^8.17.10"  // latest stable`,
+    fix:'Pin to the latest stable @react-three/fiber (v8.x). The Dither shader is self-contained — the migration is straightforward and removes the clock workaround.'
+  },
+  {
+    id:7, sev:'high', cat:'bug', title:'Batch upload: no file count or total size limit',
+    desc:'BatchUpload allows unlimited files with no cap on total payload size. A user could select hundreds of large video files. All are stored in React state simultaneously, then sent in a single FormData request. This can OOM the browser tab and crash the FastAPI server with a multi-GB multipart body.',
+    code:`// BatchUpload.tsx — no limits anywhere
+const handleDrop = useCallback((e) => {
+  const droppedFiles = Array.from(e.dataTransfer.files);
+  setFiles((prev) => [...prev, ...droppedFiles]); // unbounded
+}, []);
+
+// Fix
+const MAX_FILES = 20;
+const MAX_TOTAL_MB = 500;
+const totalMB = [...prev, ...droppedFiles]
+  .reduce((s, f) => s + f.size, 0) / 1024 / 1024;
+if (prev.length + droppedFiles.length > MAX_FILES) { setError("Max 20 files"); return; }
+if (totalMB > MAX_TOTAL_MB) { setError("Total exceeds 500MB"); return; }`,
+    fix:'Add MAX_FILES (e.g. 20) and MAX_TOTAL_SIZE checks in both handleDrop and handleFileInput. Show a clear error message when limits are exceeded.'
+  },
+  {
+    id:8, sev:'high', cat:'security', title:'Footer hardcodes localhost:8000 API Docs link',
+    desc:'Footer.tsx links to http://localhost:8000/docs — a FastAPI Swagger UI that only exists on a developer\'s machine. In production this is a dead link. Worse, it reveals the backend port and framework to anyone inspecting the page source. If a user somehow has a malicious local service on port 8000, clicking this could be a vector.',
+    code:`// Footer.tsx line 35 — shipped to production
+<a href="http://localhost:8000/docs" target="_blank">API Docs</a>
+
+// Fix
+const API_DOCS = process.env.NEXT_PUBLIC_API_DOCS_URL;
+{API_DOCS && <a href={API_DOCS} target="_blank" rel="noreferrer">API Docs</a>}`,
+    fix:'Gate this link behind an environment variable. Remove it entirely if this is a public-facing product, or move it to an admin-only section.'
+  },
+  {
+    id:9, sev:'high', cat:'perf', title:'437 KB unoptimized PNG logo in /public',
+    desc:'public/logo.png is 437 KB and the navbar uses MetallicPaint which loads it as a WebGL texture. The raw PNG is never served through next/image for compression and format negotiation. On a mobile connection, this single asset adds ~1.5s to LCP.',
+    code:`// No next/image usage anywhere in the codebase
+// logo.png: 437KB, no WebP, no srcset, no lazy loading
+
+// Fix — convert and optimize
+// 1. Run: npx sharp-cli logo.png -o public/logo.webp -f webp -q 85
+// 2. Use next/image where applicable
+import Image from 'next/image';
+<Image src="/logo.webp" width={34} height={34} alt="IntrusionX logo" priority />`,
+    fix:'Convert logo.png to WebP (target <30 KB). For the MetallicPaint WebGL texture, load a smaller version of the SVG logo-shield.svg instead of the PNG.'
+  },
+  {
+    id:10, sev:'high', cat:'bug', title:'VerificationSection defined inline in page.tsx — remounts on every state change',
+    desc:'VerificationSection is defined as a const component inside the Home function. React treats it as a new component type on every render of Home. This means every time isProcessing, result, forensics, or uploadedFile changes, React unmounts and remounts VerificationSection and all its children — including the ShapeGrid canvas rAF loop and all MagicRings animations.',
+    code:`// page.tsx — component defined INSIDE another component
+const VerificationSection = ({ ... }) => { ... }; // ← hoisted to module level needed
+
+export default function Home() {
+  const [isProcessing, setIsProcessing] = useState(false);
+  // ...
+  return <VerificationSection ... />; // remounts on every state change!
+}
+
+// Fix — move outside Home, above export default
+const VerificationSection = memo(({ ... }) => { ... });
+export default function Home() { ... }`,
+    fix:'Move VerificationSection to module scope (above Home) and wrap it in React.memo. This prevents full remounts on every state update.'
+  },
+  {
+    id:11, sev:'high', cat:'perf', title:'No request timeout on detectMedia — can hang forever',
+    desc:'The main detection API call in api.ts uses axios with no timeout configured on the shared apiClient instance, and no AbortController. If the FastAPI backend stalls (e.g. GPU memory pressure), the user sees the ProcessingTimeline spinning indefinitely with no escape path.',
+    code:`// api.ts — no timeout
+const apiClient = axios.create({ baseURL: API_BASE_URL });
+// detectMedia posts to /detect/full with no timeout
+
+// Fix
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 90000, // 90s max — generous for video processing
+});
+// Or with AbortController for user-cancelable uploads:
+const controller = new AbortController();
+const response = await apiClient.post('/detect/full', formData, {
+  signal: controller.signal,
+});`,
+    fix:'Set a default timeout on the axios instance (90s for video processing). Add an AbortController to allow user cancellation and to prevent hung requests from blocking the UI.'
+  },
+  {
+    id:12, sev:'medium', cat:'perf', title:'Entire page is "use client" — no server components',
+    desc:'page.tsx has "use client" at the top, making the entire page a client component. All static sections (StatsBar, HowItWorks, TechStack, ThreatIntelligenceMap) get bundled into the client JS bundle and sent to the browser. This inflates the initial JS payload and blocks hydration.',
+    code:`// page.tsx — entire page is client-side
+"use client";
+import Hero from "...";
+import StatsBar from "..."; // static! should be server component
+import HowItWorks from "..."; // static! should be server component
+
+// Fix — restructure
+// page.tsx (server component, no "use client")
+import HowItWorks from "..."; // server
+import StatsBar from "..."; // server
+import InteractiveSection from "./InteractiveSection"; // client-only part
+
+export default function Page() {
+  return <>
+    <StatsBar />
+    <HowItWorks />
+    <InteractiveSection /> {/* only this needs "use client" */}
+  </>;
+}`,
+    fix:'Remove "use client" from page.tsx. Extract only the state-dependent upload/result section into a client component. Static sections like HowItWorks, TechStack, StatsBar should be server components.'
+  },
+  {
+    id:13, sev:'medium', cat:'ux', title:'No prefers-reduced-motion support anywhere',
+    desc:'Every animation — Dither WebGL wave, BlobCursor GSAP, LetterGlitch, DecryptedText on every hover, MagicRings, Grainient — runs regardless of the user\'s OS accessibility setting. For users with vestibular disorders, the moving WebGL background and blob cursor are physiologically harmful.',
+    code:`// No check exists anywhere in the codebase for:
+// window.matchMedia('(prefers-reduced-motion: reduce)')
+
+// Fix — in each animation component
+const prefersReduced = window.matchMedia(
+  '(prefers-reduced-motion: reduce)'
+).matches;
+
+// In Dither: pass disableAnimation={prefersReduced}
+// In BlobCursor: skip mounting entirely if prefersReduced
+// In CSS: @media (prefers-reduced-motion: reduce) { .animate-bounce { animation: none } }`,
+    fix:'Add a prefers-reduced-motion check to BlobCursor, Dither, Grainient, and the scroll animations. At minimum, provide a CSS fallback that disables the bounce and scroll animations.'
+  },
+  {
+    id:14, sev:'medium', cat:'ux', title:'Error message rendered with wrong text color',
+    desc:'In UploadZone, file validation errors use className="text-primary" — which is white on dark backgrounds. A white error message on a dark surface is invisible and indistinguishable from normal content. It should be a warning/danger color.',
+    code:`// UploadZone.tsx — error shown in white
+<motion.p className="text-primary text-sm text-center mt-4">
+  {errorMsg}
+</motion.p>
+
+// Fix
+<motion.p className="text-sm text-center mt-4"
+  style={{ color: 'var(--color-text-danger, #E24B4A)' }}>
+  {errorMsg}
+</motion.p>`,
+    fix:'Use a semantic error color (red) for the error message, not text-primary. Also add an aria-live="polite" attribute so screen readers announce the error.'
+  },
+  {
+    id:15, sev:'medium', cat:'bug', title:'Branding inconsistency — three different project names',
+    desc:'The repo is named Tattva.ai, the README says "IntrusionX SE (Tattva.AI)", the page title is "IntrusionX SE | Deepfake Detection", package.json name is "intrusionx-frontend", and the Footer links to "github.com/ayush-writes-code/intrusionx-se" (a different repo). The Navbar component is IntrusionXNavbar.tsx. This is confusing for contributors and for SEO.',
+    fix:'Decide on one brand name and apply it consistently across the page title, metadata, package.json, README, and all component names. Update the Footer GitHub link to point to the correct repository.'
+  },
+  {
+    id:16, sev:'medium', cat:'perf', title:'MagicRings renders inside UploadZone — always active',
+    desc:'MagicRings runs a continuous Canvas 2D rAF loop inside the UploadZone. It responds to mouse position globally. This means a GPU canvas is spinning at 60fps for the entire session, even when the user is scrolled to the map section or reading results. Combined with the other canvases, this is a major battery drain on laptops.',
+    fix:'Add an IntersectionObserver to MagicRings (and all other canvas components). Pause the rAF loop when the element is not in the viewport. This alone can cut GPU usage by 60% on long pages.'
+  },
+  {
+    id:17, sev:'medium', cat:'security', title:'window.open without noopener on report download',
+    desc:'ResultsPanel calls window.open(url, "_blank") to open the downloaded report. Without rel="noopener noreferrer", the opened tab gets a reference back to the opener window via window.opener, enabling tabnapping attacks.',
+    code:`// ResultsPanel.tsx line 339
+window.open(url, "_blank"); // ❌ no noopener
+
+// Fix
+window.open(url, "_blank", "noopener,noreferrer");`,
+    fix:'Add "noopener,noreferrer" as the third argument to window.open().'
+  },
+  {
+    id:18, sev:'medium', cat:'ux', title:'No cancel or progress feedback during file upload',
+    desc:'Once a file is submitted, isProcessing=true and the UI just shows ProcessingTimeline. There is no way to cancel a slow request (no AbortController), no upload progress percentage (XHR progress events are available in axios), and the timeline steps are purely decorative/timed — not reflecting actual backend progress.',
+    fix:'Add an AbortController-based cancel button during processing. Hook into axios onUploadProgress for real upload progress. Consider a WebSocket or SSE stream from the FastAPI backend to push real analysis step completions to the UI.'
+  },
+  {
+    id:19, sev:'medium', cat:'bug', title:'Navbar "#telemetry" link points to non-existent anchor',
+    desc:'The navbar has a "System Telemetry" link with href="#telemetry". The MetricsChart section does have id="telemetry", but the first navbar item uses href="/#home" while the hero section has id="hero-section" (not "home"). The active state tracking checks window.location.hash, but hash never updates during smooth scroll — only on actual clicks.',
+    code:`// IntrusionXNavbar.tsx — mismatched IDs
+{ label: "Home", href: "/#home" },          // Hero has id="hero-section"
+{ label: "System Telemetry", href: "#telemetry" } // MetricsChart has id="telemetry" ✓
+
+// Hero.tsx
+<div id="hero-section" ...>  // ← should be id="home" or href should be "/#hero-section"`,
+    fix:'Align all anchor IDs with their corresponding navbar hrefs. Use an IntersectionObserver-based approach for active state tracking during smooth scroll, rather than relying on hashchange events.'
+  },
+  {
+    id:20, sev:'medium', cat:'ux', title:'Hardcoded dark-mode colors bypass the theme system',
+    desc:'Over 60 instances of hardcoded hex values (#080A0F, #EDEDEA, #1A1F2E, #4B5260) appear in component styles rather than using the CSS custom properties defined in globals.css. The app claims to support light/dark themes via AnimatedThemeToggler, but toggling would leave dozens of elements in the wrong color since they bypass the variable system.',
+    code:`// Example — ResultsPanel.tsx (many like this)
+backgroundColor: "#0D1117"   // ← ignores --bg / var(--color-background)
+color: "#EDEDEA"             // ← ignores --primary / var(--color-primary)
+stroke: "#1A1F2E"            // ← ignores --border / var(--color-border)
+
+// Fix
+backgroundColor: "var(--color-background-secondary)"
+color: "var(--color-primary)"
+stroke: "var(--color-border)"`,
+    fix:'Audit all 60+ hardcoded hex instances and replace with the corresponding CSS custom property. This also makes theming (light/dark, custom brand colors) trivial in the future.'
+  },
+  {
+    id:21, sev:'medium', cat:'perf', title:'No image optimization — <img> used instead of next/image',
+    desc:'ResultsPanel renders forensic analysis images (heatmaps, spectrograms, waveforms) as bare <img> tags with no width/height set and no lazy loading. These are base64-encoded images from the API — potentially hundreds of KB each. No srcset, no blur-up placeholder, layout shift on load.',
+    code:`// ResultsPanel.tsx — ForensicCard
+<img src={imageSrc} alt={title} className="w-full h-auto block" />
+// imageSrc is a base64 string — no lazy loading, no LCP optimization
+
+// For static assets, use next/image:
+import Image from 'next/image';
+<Image src={imageSrc} alt={title} fill style={{ objectFit: 'contain' }}
+  loading="lazy" placeholder="blur" blurDataURL="data:..." />`,
+    fix:'For the base64 forensic images, add loading="lazy" to the <img> tags at minimum, and set explicit width/height to prevent layout shift. For static assets in /public, switch to next/image.'
+  },
+  {
+    id:22, sev:'low', cat:'perf', title:'mathjs imported but used for nothing visible',
+    desc:'mathjs (a 1.6 MB library) is listed in dependencies and presumably imported somewhere. Scanning the source shows no direct import — it may be an unused transitive or leftover dependency. This adds to the bundle even if tree-shaking removes it, slowing install and complicating audits.',
+    fix:'Run `npx depcheck` to identify unused dependencies. Remove mathjs from package.json if it is truly unused. If needed for a specific calculation, import only the relevant function: `import { evaluate } from "mathjs/number"`.'
+  },
+  {
+    id:23, sev:'low', cat:'ux', title:'ThreatIntelligenceMap tooltip renders at wrong scale',
+    desc:'The MapMarkerHoverNode tooltip uses a foreignObject with scale(0.11) — it is scaled down to 11% of its natural size to fit the SVG coordinate space. This means the HTML inside must be written at 10x its intended size, making the CSS values magical numbers. The approach also causes font rendering artifacts at sub-pixel scales.',
+    code:`// ThreatIntelligenceMap.tsx
+initial={{ opacity: 0, y: 1, scale: 0.11 }}
+animate={{ opacity: 1, y: 0, scale: 0.11 }}  // permanently at 11%!
+// Text inside: "text-xl text-lg text-base" — all 10x too large to compensate`,
+    fix:'Use an SVG-native tooltip overlay rendered in a fixed-position <div> portal above the SVG, positioned using the x/y screen coordinates from the marker. This avoids the scale hack and gives crisp text rendering.'
+  },
+  {
+    id:24, sev:'low', cat:'ux', title:'ProcessingTimeline is decorative-only — misleads users',
+    desc:'ProcessingTimeline shows animated steps (Upload, Analysis, Forensics, etc.) that auto-advance on timers, completely disconnected from actual backend progress. This can undermine trust: the UI shows "Complete" while the API is still running, or shows animated steps while the API has already failed.',
+    fix:'Either remove the timeline animation and replace with a simple spinner + status message, or connect it to real backend events via WebSocket/SSE progress streaming from FastAPI.'
+  },
+  {
+    id:25, sev:'low', cat:'ux', title:'Missing SEO/Open Graph metadata',
+    desc:'layout.tsx only sets a bare title and description. No og:image, og:type, twitter:card, robots, viewport, or canonical URL. When this is shared on social media or indexed by search engines, it will have no preview image and potentially no description.',
+    code:`// Fix — layout.tsx
+export const metadata: Metadata = {
+  title: "Tattva.ai | AI Deepfake Detection",
+  description: "Multi-modal neural verification for images, video & audio.",
+  openGraph: {
+    title: "Tattva.ai | Deepfake Detection",
+    description: "...",
+    url: "https://tattva.ai",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: { card: "summary_large_image" },
+  robots: { index: true, follow: true },
+};`,
+    fix:'Add a full metadata object to layout.tsx following the Next.js Metadata API. Create a 1200×630 OG image for social sharing.'
+  },
+];
+
+function filter(type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.closest('.filter-btn').classList.add('active');
+  const cards = document.querySelectorAll('.issue-card');
+  cards.forEach(card => {
+    const sev = card.dataset.sev;
+    const cat = card.dataset.cat;
+    if(type==='all') card.style.display='';
+    else if(type==='critical'||type==='high'||type==='medium'||type==='low') card.style.display = sev===type ? '' : 'none';
+    else card.style.display = cat===type ? '' : 'none';
+  });
+  document.querySelectorAll('.section-sep').forEach(sep => {
+    const next = sep.nextElementSibling;
+    sep.style.display = (next && next.style.display !== 'none') ? '' : 'none';
+  });
+}
+
+function render() {
+  const sections = [
+    {label:'Critical — Fix before launch', filter: i => i.sev==='critical'},
+    {label:'High — Fix this sprint', filter: i => i.sev==='high'},
+    {label:'Medium — Schedule soon', filter: i => i.sev==='medium'},
+    {label:'Low — Nice to have', filter: i => i.sev==='low'},
+  ];
+  const list = document.getElementById('list');
+  sections.forEach(sec => {
+    const filtered = issues.filter(sec.filter);
+    const sep = document.createElement('div');
+    sep.className = 'section-sep';
+    sep.textContent = sec.label;
+    list.appendChild(sep);
+    filtered.forEach(issue => {
+      const card = document.createElement('div');
+      card.className = 'issue-card';
+      card.dataset.sev = issue.sev;
+      card.dataset.cat = issue.cat;
+      card.innerHTML = `
+        <div class="issue-header">
+          <span class="sev-badge sev-${issue.sev}">${issue.sev.toUpperCase()}</span>
+          <span class="issue-title">${issue.title}</span>
+          <span class="issue-cat">${issue.cat}</span>
+          <span class="expand-icon ti ti-chevron-down" aria-hidden="true"></span>
+        </div>
+        <div class="issue-body">
+          <p class="issue-desc">${issue.desc}</p>
+          ${issue.code ? `<div class="fix-label">Code</div><div class="issue-code">${issue.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
+          <div class="fix-label">Recommendation</div>
+          <p class="issue-desc">${issue.fix}</p>
+        </div>`;
+      card.querySelector('.issue-header').addEventListener('click', () => {
+        const body = card.querySelector('.issue-body');
+        const open = body.classList.toggle('open');
+        card.classList.toggle('expanded', open);
+      });
+      list.appendChild(card);
+    });
+  });
+}
+render();
+</script>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from 'react';
+import { useInView } from 'framer-motion';
 
 const LetterGlitch = ({
   glitchColors = ['#2b4539', '#61dca3', '#61b3dc'],
@@ -22,14 +23,18 @@ const LetterGlitch = ({
   const letters = useRef<
     {
       char: string;
-      color: string;
-      targetColor: string;
+      color: { r: number, g: number, b: number };
+      targetColor: { r: number, g: number, b: number };
       colorProgress: number;
     }[]
   >([]);
   const grid = useRef({ columns: 0, rows: 0 });
   const context = useRef<CanvasRenderingContext2D | null>(null);
   const lastGlitchTime = useRef(Date.now());
+
+  const isInView = useInView(canvasRef, { margin: "200px" });
+  const isInViewRef = useRef(isInView);
+  useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
 
   const lettersAndSymbols = Array.from(characters);
 
@@ -38,11 +43,7 @@ const LetterGlitch = ({
   const charHeight = 20;
 
   const getRandomChar = () => {
-    return lettersAndSymbols[Math.floor(Math.random() * lettersAndSymbols.length)];
-  };
-
-  const getRandomColor = () => {
-    return glitchColors[Math.floor(Math.random() * glitchColors.length)];
+    return lettersAndSymbols[Math.floor(Math.random() * lettersAndSymbols.length)] || '0';
   };
 
   const hexToRgb = (hex: string) => {
@@ -52,13 +53,22 @@ const LetterGlitch = ({
     });
 
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
+    return (result && result[1] && result[2] && result[3])
       ? {
           r: parseInt(result[1], 16),
           g: parseInt(result[2], 16),
           b: parseInt(result[3], 16)
         }
-      : null;
+      : { r: 0, g: 0, b: 0 };
+  };
+
+  const parsedColors = useRef<{ r: number, g: number, b: number }[]>([]);
+  if (parsedColors.current.length === 0) {
+    parsedColors.current = glitchColors.map(hexToRgb);
+  }
+
+  const getRandomColor = () => {
+    return parsedColors.current[Math.floor(Math.random() * parsedColors.current.length)] || { r: 0, g: 0, b: 0 };
   };
 
   const interpolateColor = (
@@ -66,12 +76,11 @@ const LetterGlitch = ({
     end: { r: number; g: number; b: number },
     factor: number
   ) => {
-    const result = {
+    return {
       r: Math.round(start.r + (end.r - start.r) * factor),
       g: Math.round(start.g + (end.g - start.g) * factor),
       b: Math.round(start.b + (end.b - start.b) * factor)
     };
-    return `rgb(${result.r}, ${result.g}, ${result.b})`;
   };
 
   const calculateGrid = (width: number, height: number) => {
@@ -126,7 +135,7 @@ const LetterGlitch = ({
     letters.current.forEach((letter, index) => {
       const x = (index % grid.current.columns) * charWidth;
       const y = Math.floor(index / grid.current.columns) * charHeight;
-      ctx.fillStyle = letter.color;
+      ctx.fillStyle = `rgb(${letter.color.r}, ${letter.color.g}, ${letter.color.b})`;
       ctx.fillText(letter.char, x, y);
     });
   };
@@ -159,12 +168,8 @@ const LetterGlitch = ({
         letter.colorProgress += 0.05;
         if (letter.colorProgress > 1) letter.colorProgress = 1;
 
-        const startRgb = hexToRgb(letter.color);
-        const endRgb = hexToRgb(letter.targetColor);
-        if (startRgb && endRgb) {
-          letter.color = interpolateColor(startRgb, endRgb, letter.colorProgress);
-          needsRedraw = true;
-        }
+        letter.color = interpolateColor(letter.color, letter.targetColor, letter.colorProgress);
+        needsRedraw = true;
       }
     });
 
@@ -174,6 +179,11 @@ const LetterGlitch = ({
   };
 
   const animate = () => {
+    if (!isInViewRef.current) {
+      animationRef.current = requestAnimationFrame(animate);
+      return;
+    }
+
     const now = Date.now();
     if (now - lastGlitchTime.current >= glitchSpeed) {
       updateLetters();
@@ -222,7 +232,7 @@ const LetterGlitch = ({
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundColor: '#080A0F',
+    backgroundColor: 'var(--bg)',
     overflow: 'hidden',
     zIndex: 0,
     opacity: 1, // Restored full base opacity

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from 'react';
+import { useInView, useReducedMotion } from 'framer-motion';
 import './ShapeGrid.css';
 
 type CanvasStrokeStyle = string | CanvasGradient | CanvasPattern;
@@ -38,9 +39,14 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
   const trailCells = useRef<GridOffset[]>([]);
   const cellOpacities = useRef<Map<string, number>>(new Map());
 
+  const isInView = useInView(canvasRef, { margin: "200px", once: true });
+  const shouldReduceMotion = useReducedMotion();
+  const isInViewRef = useRef(isInView);
+  useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !isInView) return;
     const ctx = canvas.getContext('2d');
 
     const isHex = shape === 'hexagon';
@@ -48,11 +54,16 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
     const hexHoriz = squareSize * 1.5;
     const hexVert = squareSize * Math.sqrt(3);
 
+    let cachedGradient: CanvasGradient | null = null;
+    let cachedWidth = 0;
+    let cachedHeight = 0;
+
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
       numSquaresX.current = Math.ceil(canvas.width / squareSize) + 1;
       numSquaresY.current = Math.ceil(canvas.height / squareSize) + 1;
+      cachedGradient = null;
     };
 
     window.addEventListener('resize', resizeCanvas);
@@ -211,23 +222,35 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
       }
 
       /* Radial gradient overlay for fade-out effect */
-      const gradient = ctx.createRadialGradient(
-        canvas.width / 2,
-        canvas.height / 2,
-        0,
-        canvas.width / 2,
-        canvas.height / 2,
-        Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2
-      );
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      gradient.addColorStop(1, '#080A0F'); // Matches background color
+      if (!cachedGradient || cachedWidth !== canvas.width || cachedHeight !== canvas.height) {
+        cachedWidth = canvas.width;
+        cachedHeight = canvas.height;
+        cachedGradient = ctx.createRadialGradient(
+          canvas.width / 2,
+          canvas.height / 2,
+          0,
+          canvas.width / 2,
+          canvas.height / 2,
+          Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2
+        );
+        cachedGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        const resolvedBg = typeof window !== 'undefined'
+          ? getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#080A0F'
+          : '#080A0F';
+        cachedGradient.addColorStop(1, resolvedBg); // Matches background color
+      }
 
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = cachedGradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
 
     const updateAnimation = () => {
-      const effectiveSpeed = Math.max(speed, 0.1);
+      if (!isInViewRef.current) {
+        requestRef.current = requestAnimationFrame(updateAnimation);
+        return;
+      }
+
+      const effectiveSpeed = shouldReduceMotion ? 0 : Math.max(speed, 0.1);
       const wrapX = isHex ? hexHoriz * 2 : squareSize;
       const wrapY = isHex ? hexVert : isTri ? squareSize * 2 : squareSize;
 
@@ -267,6 +290,7 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
       if (hoverTrailAmount > 0) {
         for (let i = 0; i < trailCells.current.length; i++) {
           const t = trailCells.current[i];
+          if (!t) continue;
           const key = `${t.x},${t.y}`;
           if (!targets.has(key)) {
             targets.set(key, (trailCells.current.length - i) / (trailCells.current.length + 1));
@@ -403,7 +427,7 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [direction, speed, borderColor, hoverFillColor, squareSize, shape, hoverTrailAmount]);
+  }, [isInView, direction, speed, borderColor, hoverFillColor, squareSize, shape, hoverTrailAmount]);
 
   return <canvas ref={canvasRef} className="shapegrid-canvas"></canvas>;
 };

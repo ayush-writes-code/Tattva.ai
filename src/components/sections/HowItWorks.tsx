@@ -5,7 +5,8 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { UploadCloud, Cpu, ShieldCheck } from "lucide-react";
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import BorderGlow from "@/components/reactbits/BorderGlow";
-import LetterGlitch from "@/components/reactbits/LetterGlitch";
+import dynamic from "next/dynamic";
+const LetterGlitch = dynamic(() => import("@/components/reactbits/LetterGlitch"), { ssr: false });
 
 const STEPS = [
   {
@@ -66,7 +67,7 @@ export default function HowItWorks() {
               className="h-full"
               animated={true}
               glowColor="186 100% 74%"
-              backgroundColor="#080A0F"
+              backgroundColor="var(--bg)"
               borderRadius={0}
               glowRadius={30}
               glowIntensity={0.6}

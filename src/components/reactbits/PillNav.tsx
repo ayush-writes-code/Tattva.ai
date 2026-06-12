@@ -186,12 +186,14 @@ const PillNav: React.FC<PillNavProps> = ({
 
     if (hamburger) {
       const lines = hamburger.querySelectorAll('.hamburger-line');
-      if (newState) {
-        gsap.to(lines[0], { rotation: 45, y: 3, duration: 0.3, ease });
-        gsap.to(lines[1], { rotation: -45, y: -3, duration: 0.3, ease });
-      } else {
-        gsap.to(lines[0], { rotation: 0, y: 0, duration: 0.3, ease });
-        gsap.to(lines[1], { rotation: 0, y: 0, duration: 0.3, ease });
+      if (lines && lines.length >= 2 && lines[0] && lines[1]) {
+        if (newState) {
+          gsap.to(lines[0], { rotation: 45, y: 3, duration: 0.3, ease });
+          gsap.to(lines[1], { rotation: -45, y: -3, duration: 0.3, ease });
+        } else {
+          gsap.to(lines[0], { rotation: 0, y: 0, duration: 0.3, ease });
+          gsap.to(lines[1], { rotation: 0, y: 0, duration: 0.3, ease });
+        }
       }
     }
 
@@ -289,7 +291,7 @@ const PillNav: React.FC<PillNavProps> = ({
                     role="menuitem"
                     href={item.href}
                     className={`pill${activeHref === item.href ? ' is-active' : ''}`}
-                    aria-label={item.ariaLabel || item.label}
+                    aria-label={item.ariaLabel || (typeof item.label === 'string' ? item.label : undefined)}
                     onMouseEnter={() => handleEnter(i)}
                     onMouseLeave={() => handleLeave(i)}
                   >
@@ -312,7 +314,7 @@ const PillNav: React.FC<PillNavProps> = ({
                     role="menuitem"
                     href={item.href}
                     className={`pill${activeHref === item.href ? ' is-active' : ''}`}
-                    aria-label={item.ariaLabel || item.label}
+                    aria-label={item.ariaLabel || (typeof item.label === 'string' ? item.label : undefined)}
                     onMouseEnter={() => handleEnter(i)}
                     onMouseLeave={() => handleLeave(i)}
                     {...(isNewTabLink(item.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}

@@ -103,7 +103,7 @@ const TextType = ({
 
     let timeout: ReturnType<typeof setTimeout>;
 
-    const currentText = textArray[currentTextIndex];
+    const currentText = textArray[currentTextIndex] || '';
     const processedText = reverseMode ? currentText.split('').reverse().join('') : currentText;
 
     const executeTypingAnimation = () => {
@@ -115,7 +115,7 @@ const TextType = ({
           }
 
           if (onSentenceComplete) {
-            onSentenceComplete(textArray[currentTextIndex], currentTextIndex);
+            onSentenceComplete(textArray[currentTextIndex] || '', currentTextIndex);
           }
 
           setCurrentTextIndex(prev => (prev + 1) % textArray.length);
@@ -169,7 +169,7 @@ const TextType = ({
   ]);
 
   const shouldHideCursor =
-    hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
+    hideCursorWhileTyping && (currentCharIndex < (textArray[currentTextIndex] || '').length || isDeleting);
 
     const highlightedText = useMemo(() => {
       let result = displayedText;

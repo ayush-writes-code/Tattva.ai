@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export interface AiInsight {
   category: string;
@@ -47,13 +47,13 @@ export interface DetectionResponse {
     frame_results?: SuspiciousFrame[];
     analysis?: string[];
     ai_insights?: AiInsightsData;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   file_info?: {
     filename: string;
     content_type?: string;
     size_bytes?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   forensics?: ForensicsData;
 }
@@ -72,30 +72,37 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
 });
 
-export const detectMedia = async (file: File): Promise<DetectionResponse> => {
+export const detectMedia = async (file: File, signal?: AbortSignal): Promise<DetectionResponse> => {
   try {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await apiClient.post<DetectionResponse>("/detect/full", formData);
+    const response = await apiClient.post<DetectionResponse>("/detect/full", formData, {
+      signal,
+      timeout: 120000,
+    });
     return response.data;
-  } catch (error: any) {
-    console.error("Detection API Error: ", error);
-    if (error.response && error.response.data) {
-        throw new Error(error.response.data.detail || "An error occurred during detection");
+  } catch (error: unknown) {
+    console.error("API Error: ", error);
+    if (axios.isAxiosError(error) && error.response && error.response.data) {
+        throw new Error((error.response.data as Record<string, unknown>).detail as string || "An error occurred during detection");
     }
-    throw new Error(error.message || "Failed to connect to the detection server.");
+    const err = error as Error;
+    throw new Error(err.message || "Failed to connect to the detection server.");
   }
 };
 
-export const getHeatmap = async (file: File): Promise<string | null> => {
+export const getHeatmap = async (file: File, signal?: AbortSignal): Promise<string | null> => {
   try {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await apiClient.post("/detect/heatmap", formData);
+    const response = await apiClient.post("/detect/heatmap", formData, {
+      signal,
+      timeout: 60000,
+    });
     return response.data.heatmap || null;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Heatmap API Error: ", error);
     return null;
   }
@@ -120,6 +127,9 @@ export const generateReport = async (file: File): Promise<ReportResponse> => {
 };
 
 export const getReportDownloadUrl = (downloadPath: string): string => {
+  if (downloadPath.startsWith("http://") || downloadPath.startsWith("https://")) {
+    return downloadPath;
+  }
   return `${API_BASE_URL}${downloadPath}`;
 };
 
@@ -146,7 +156,7 @@ export interface BatchResultItem {
   authenticity_score: number;
   risk_level: string;
   error?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BatchResponse {
@@ -154,20 +164,24 @@ export interface BatchResponse {
   results: BatchResultItem[];
 }
 
-export const detectBatch = async (files: File[]): Promise<BatchResponse> => {
+export const detectBatch = async (files: File[], signal?: AbortSignal): Promise<BatchResponse> => {
   try {
     const formData = new FormData();
     for (const file of files) {
       formData.append("files", file);
     }
 
-    const response = await apiClient.post<BatchResponse>("/detect/batch", formData);
+    const response = await apiClient.post<BatchResponse>("/detect/batch", formData, {
+      signal,
+      timeout: 300000, // 5 minutes for batch
+    });
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Batch Detection API Error: ", error);
-    if (error.response && error.response.data) {
-        throw new Error(error.response.data.detail || "An error occurred during batch detection");
+    if (axios.isAxiosError(error) && error.response && error.response.data) {
+        throw new Error((error.response.data as Record<string, unknown>).detail as string || "An error occurred during batch detection");
     }
-    throw new Error(error.message || "Failed to connect to the detection server.");
+    const err = error as Error;
+    throw new Error(err.message || "Failed to connect to the detection server.");
   }
 };

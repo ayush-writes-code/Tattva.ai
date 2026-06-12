@@ -18,8 +18,30 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "IntrusionX SE | Deepfake Detection",
+  title: "Tattva.ai | Deepfake Detection",
   description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
+  openGraph: {
+    title: "Tattva.ai | Deepfake Detection",
+    description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
+    url: "https://tattva.ai",
+    siteName: "Tattva.ai",
+    images: [
+      {
+        url: "/logo.webp",
+        width: 1200,
+        height: 630,
+        alt: "Tattva.ai Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tattva.ai | Deepfake Detection",
+    description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
+    images: ["/logo.webp"],
+  },
 };
 
 export default function RootLayout({

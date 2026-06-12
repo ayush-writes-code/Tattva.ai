@@ -2,6 +2,7 @@
 
 import { Renderer, Program, Mesh, Triangle } from 'ogl';
 import { useEffect, useRef } from 'react';
+import { useInView } from 'framer-motion';
 
 import './Radar.css';
 
@@ -35,7 +36,7 @@ function hexToVec3(hex: string): [number, number, number] {
     document.body.removeChild(temp);
     
     const match = computed.match(/\d+/g);
-    if (match) {
+    if (match && match.length >= 3 && match[0] && match[1] && match[2]) {
       const r = parseInt(match[0]);
       const g = parseInt(match[1]);
       const b = parseInt(match[2]);
@@ -155,8 +156,12 @@ export default function Radar({
 }: RadarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const isInView = useInView(containerRef, { margin: "200px", once: true });
+  const isInViewRef = useRef(isInView);
+  useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
+
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !isInView) return;
     const container = containerRef.current;
     
     // Setting alpha to true natively enforces webgl transparency!
@@ -166,8 +171,8 @@ export default function Radar({
     gl.clearColor(0, 0, 0, 0);
 
     let program: Program;
-    let currentMouse = [0.5, 0.5];
-    let targetMouse = [0.5, 0.5];
+    let currentMouse: [number, number] = [0.5, 0.5];
+    let targetMouse: [number, number] = [0.5, 0.5];
 
     function handleMouseMove(e: MouseEvent) {
       const rect = gl.canvas.getBoundingClientRect();
@@ -230,6 +235,8 @@ export default function Radar({
 
     function update(time: number) {
       animationFrameId = requestAnimationFrame(update);
+      if (!isInViewRef.current) return;
+
       program.uniforms.uTime.value = time * 0.001;
 
       if (enableMouseInteraction) {
@@ -256,7 +263,7 @@ export default function Radar({
       container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [speed, scale, ringCount, spokeCount, ringThickness, spokeThickness, sweepSpeed, sweepWidth, sweepLobes, color, backgroundColor, falloff, brightness, enableMouseInteraction, mouseInfluence]);
+  }, [isInView, speed, scale, ringCount, spokeCount, ringThickness, spokeThickness, sweepSpeed, sweepWidth, sweepLobes, color, backgroundColor, falloff, brightness, enableMouseInteraction, mouseInfluence]);
 
   return <div ref={containerRef} className="radar-container" />;
 }

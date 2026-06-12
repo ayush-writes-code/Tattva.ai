@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "framer-motion";
 import { Home, Cpu, UploadCloud, Activity, Code2 } from "lucide-react";
 import PillNav from "@/components/reactbits/PillNav";
 import { AnimatedThemeToggler } from "@/components/ui/AnimatedThemeToggler";
@@ -22,6 +22,7 @@ export default function IntrusionXNavbar() {
   const [activeSegment, setActiveSegment] = useState("/");
   const [hidden, setHidden] = useState(false);
   const { scrollY } = useScroll();
+  const shouldReduceMotion = useReducedMotion();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
@@ -92,18 +93,19 @@ export default function IntrusionXNavbar() {
           <span className="hidden sm:inline">GitHub Repo</span>
         </span>
       ),
-      href: "https://github.com/ayush-writes-code/intrusionx-se",
+      href: "https://github.com/ayushtomar/TattvaAI",
     },
   ];
 
   return (
-    <motion.div 
+    <motion.nav 
+      aria-label="Main navigation"
       variants={{
         visible: { y: 0, opacity: 1 },
         hidden: { y: "-150%", opacity: 0 }
       }}
       animate={hidden ? "hidden" : "visible"}
-      transition={{ duration: 0.35, ease: "easeInOut" }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: "easeInOut" }}
       className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] drop-shadow-xl flex items-center gap-4"
     >
       <PillNav
@@ -128,13 +130,13 @@ export default function IntrusionXNavbar() {
         }
         items={navItems}
         activeHref={activeSegment}
-        initialLoadAnimation={true}
+        initialLoadAnimation={!shouldReduceMotion}
         baseColor="var(--bg)" // The color of the hover explosion circle
         pillColor="var(--primary)" // Surface color of the unhovered pill
         pillTextColor="var(--surface)" // Text color of unhovered pill
         hoveredPillTextColor="var(--primary)" // Text color when hovered inside the white circle
       />
-      <AnimatedThemeToggler className="w-11 h-11 shrink-0 rounded-full bg-[var(--primary)] border border-border/10 flex items-center justify-center transition-transform hover:scale-110 shadow-sm" />
-    </motion.div>
+      <AnimatedThemeToggler className="w-11 h-11 shrink-0 rounded-full bg-primary border border-border/10 flex items-center justify-center transition-transform hover:scale-110 shadow-sm" />
+    </motion.nav>
   );
 }

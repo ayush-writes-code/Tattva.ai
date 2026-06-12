@@ -20,7 +20,13 @@ export default function ProcessingTimeline() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev < STEPS.length - 1 ? prev + 1 : prev));
+      setCurrentStep((prev) => {
+        if (prev >= STEPS.length - 1) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
+      });
     }, 1200);
     return () => clearInterval(interval);
   }, []);
@@ -29,7 +35,7 @@ export default function ProcessingTimeline() {
     <BorderGlow
       animated={true}
       glowColor="186 100% 74%"
-      backgroundColor="#080A0F"
+      backgroundColor="var(--bg)"
       borderRadius={0}
       glowRadius={30}
       glowIntensity={0.6}
@@ -64,13 +70,13 @@ export default function ProcessingTimeline() {
                   className={cn(
                     "absolute -left-[7px] w-[14px] h-[14px] rounded-full flex items-center justify-center transition-all duration-300 shrink-0",
                     isCompleted 
-                      ? "bg-[#EDEDEA] border-2 border-[#EDEDEA]" 
+                      ? "bg-primary border-2 border-[var(--primary)]" 
                       : isActive 
-                        ? "bg-surface border-2 border-[#EDEDEA]" 
+                        ? "bg-surface border-2 border-[var(--primary)]" 
                         : "bg-surface border-2 border-border"
                   )}
                 >
-                  {isCompleted && <Check className="w-2 h-2 text-[#080A0F] stroke-[3]" />}
+                  {isCompleted && <Check className="w-2 h-2 text-background stroke-[3]" />}
                 </div>
                 
                 <p className={cn(

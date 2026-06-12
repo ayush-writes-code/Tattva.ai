@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback } from "react";
 import gsap from "gsap";
+import { useReducedMotion } from "framer-motion";
 
 interface BlobCursorProps {
   fillColor?: string;
@@ -23,6 +24,7 @@ export default function BlobCursor({
   zIndex = 9999,
 }: BlobCursorProps) {
   const blobsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleMove = useCallback(
     (e: MouseEvent) => {
@@ -41,9 +43,12 @@ export default function BlobCursor({
   );
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
     document.addEventListener("mousemove", handleMove);
     return () => document.removeEventListener("mousemove", handleMove);
-  }, [handleMove]);
+  }, [handleMove, shouldReduceMotion]);
+
+  if (shouldReduceMotion) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex }}>
@@ -53,12 +58,12 @@ export default function BlobCursor({
           ref={(el) => { blobsRef.current[i] = el; }}
           className="fixed top-0 left-0 rounded-full pointer-events-none mix-blend-screen"
           style={{
-            width: sizes[i],
-            height: sizes[i],
+            width: sizes[i] || sizes[0] || 20,
+            height: sizes[i] || sizes[0] || 20,
             backgroundColor: fillColor,
-            opacity: opacities[i],
+            opacity: opacities[i] || opacities[0] || 0.5,
             transform: "translate(-50%, -50%)",
-            boxShadow: `0 0 ${sizes[i] * 1.5}px ${sizes[i] * 0.4}px ${fillColor}`,
+            boxShadow: `0 0 ${(sizes[i] || sizes[0] || 20) * 1.5}px ${(sizes[i] || sizes[0] || 20) * 0.4}px ${fillColor}`,
             willChange: "transform",
           }}
         />

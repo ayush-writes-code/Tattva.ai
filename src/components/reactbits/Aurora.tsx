@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-// @ts-expect-error - OGL doesn't have complete TS types
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 
 const VERT = `#version 300 es

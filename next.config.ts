@@ -1,13 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: {
-    // Don't fail production builds on lint warnings
-    ignoreDuringBuilds: true,
+  reactStrictMode: true,
+  transpilePackages: ['@react-three/fiber', 'three', '@react-three/postprocessing'],
+  poweredByHeader: false,
+  compress: true,
+  images: {
+    formats: ['image/avif', 'image/webp'],
   },
-  typescript: {
-    // Don't fail production builds on type errors (we lint separately)
-    ignoreBuildErrors: true,
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        ],
+      },
+    ];
   },
 };
 

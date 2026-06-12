@@ -25,12 +25,12 @@
 
   /* DARK MODE */
   .dark {
-    --bg: #000000;
-    --surface: #0A0A0A;
-    --border: #1A1A1A;
-    --primary: #FFFFFF;
-    --muted: #888888;
-    --faint: #333333;
+    --bg: #080A0F;
+    --surface: #0A0D14;
+    --border: #1A1F2E;
+    --primary: #EDEDEA;
+    --muted: #8B949E;
+    --faint: #30363D;
   }
 
   body {

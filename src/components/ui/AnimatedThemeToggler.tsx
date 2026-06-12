@@ -15,10 +15,12 @@ export const AnimatedThemeToggler = ({
   duration = 400,
   ...props
 }: AnimatedThemeTogglerProps) => {
+  const [mounted, setMounted] = useState(false)
   const [isDark, setIsDark] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
+    setMounted(true)
     const updateTheme = () => {
       setIsDark(document.documentElement.classList.contains("dark"))
     }
@@ -83,6 +85,15 @@ export const AnimatedThemeToggler = ({
       })
     }
   }, [isDark, duration])
+
+  if (!mounted) {
+    return (
+      <button type="button" className={cn(className)} {...props}>
+        <div className="w-5 h-5" />
+        <span className="sr-only">Toggle theme</span>
+      </button>
+    )
+  }
 
   return (
     <button

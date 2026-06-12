@@ -17,7 +17,7 @@ const VERDICT_COLORS: Record<string, string> = {
   ERROR: "#4B5260",
 };
 
-const RING_BG = "#1A1F2E";
+const RING_BG = "var(--border)";
 
 interface ResultsPanelProps {
   result: DetectionResponse;
@@ -35,7 +35,7 @@ const ForensicCard = ({
   title: string;
   description: string;
   imageSrc: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
 }) => {
   return (
     <motion.div
@@ -46,7 +46,7 @@ const ForensicCard = ({
       <BorderGlow
         animated={true}
         glowColor="186 100% 74%"
-        backgroundColor="#080A0F"
+        backgroundColor="var(--bg)"
         borderRadius={0}
         glowRadius={30}
         glowIntensity={0.6}
@@ -66,7 +66,7 @@ const ForensicCard = ({
             </div>
           </div>
           <div className="relative w-full overflow-hidden bg-background">
-            <img src={imageSrc} alt={title} className="w-full h-auto block" />
+            <img src={imageSrc} alt={title} className="w-full h-auto block" loading="lazy" />
           </div>
         </div>
       </BorderGlow>
@@ -87,7 +87,7 @@ const TemporalChart = ({ timeline }: { timeline: { frame: number; timestamp: num
       <BorderGlow
         animated={true}
         glowColor="186 100% 74%"
-        backgroundColor="#080A0F"
+        backgroundColor="var(--bg)"
         borderRadius={0}
         glowRadius={30}
         glowIntensity={0.6}
@@ -111,7 +111,7 @@ const TemporalChart = ({ timeline }: { timeline: { frame: number; timestamp: num
           <div className="p-4 h-[calc(100%-80px)]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={timeline}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1A1F2E" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis
                   dataKey="timestamp"
                   stroke="#4B5260"
@@ -126,10 +126,10 @@ const TemporalChart = ({ timeline }: { timeline: { frame: number; timestamp: num
                   label={{ value: "Fakeness %", angle: -90, position: "insideLeft", fill: "#4B5260", fontSize: 10 }}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0D1117", border: "1px solid #1A1F2E", color: "#EDEDEA", fontSize: 12 }}
-                  itemStyle={{ color: "#EDEDEA" }}
+                  contentStyle={{ backgroundColor: "#0D1117", border: "1px solid var(--border)", color: "var(--primary)", fontSize: 12 }}
+                  itemStyle={{ color: "var(--primary)" }}
                   labelFormatter={(v) => `${v}s`}
-                  formatter={(value: number) => [`${value.toFixed(1)}%`, "Manipulation"]}
+                  formatter={(value: any) => [`${Number(value || 0).toFixed(1)}%`, "Manipulation"]}
                 />
                 <ReferenceLine y={50} stroke="#ef4444" strokeDasharray="5 5" strokeWidth={1} label={{ value: "Threshold", fill: "#4B5260", fontSize: 9 }} />
                 <Line
@@ -164,7 +164,7 @@ const AnnotatedVideoPlayer = ({ videoSrc }: { videoSrc: string }) => {
       <BorderGlow
         animated={true}
         glowColor="186 100% 74%"
-        backgroundColor="#080A0F"
+        backgroundColor="var(--bg)"
         borderRadius={0}
         glowRadius={30}
         glowIntensity={0.6}
@@ -248,7 +248,7 @@ const ExifIntegrityCard = ({ metadata, fileInfo }: { metadata: any; fileInfo: an
       <BorderGlow
         animated={true}
         glowColor="186 100% 74%"
-        backgroundColor="#080A0F"
+        backgroundColor="var(--bg)"
         borderRadius={0}
         glowRadius={30}
         glowIntensity={0.6}
@@ -274,7 +274,7 @@ const ExifIntegrityCard = ({ metadata, fileInfo }: { metadata: any; fileInfo: an
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColors[field.status] }} />
               <span className="text-muted">{field.label}</span>
             </div>
-            <span style={{ color: field.status !== "ok" ? statusColors[field.status] : "#EDEDEA" }}>{field.value}</span>
+            <span style={{ color: field.status !== "ok" ? statusColors[field.status] : "var(--primary)" }}>{field.value}</span>
           </div>
         ))}
         </div>
@@ -336,7 +336,7 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
                     try {
                       const report = await generateReport(uploadedFile);
                       const url = getReportDownloadUrl(report.download_url);
-                      window.open(url, "_blank");
+                      window.open(url, "_blank", "noopener,noreferrer");
                     } catch (err: any) {
                       console.error("Report generation failed:", err);
                       alert(`Report generation failed: ${err?.message || "Unknown error. Check if backend is running."}`);
@@ -345,7 +345,7 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
                     }
                   }}
                   disabled={isGeneratingReport}
-                  className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 border border-[#EDEDEA] text-[#EDEDEA] text-xs font-medium uppercase tracking-[0.08em] hover:bg-[#EDEDEA] hover:text-[#080A0F] transition-colors disabled:opacity-50 disabled:cursor-wait"
+                  className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--primary)] text-primary text-xs font-medium uppercase tracking-[0.08em] hover:bg-primary hover:text-background transition-colors disabled:opacity-50 disabled:cursor-wait"
                 >
                   {isGeneratingReport ? (
                     <>
@@ -368,7 +368,7 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={chartData} cx="50%" cy="50%" innerRadius={70} outerRadius={90} startAngle={90} endAngle={-270} dataKey="value" stroke="none" animationDuration={1500}>
-                  <Cell key="cell-0" fill={verdictColor} />
+                  <Cell key="cell-0" fill={verdictColor || "#ef4444"} />
                   <Cell key="cell-1" fill={RING_BG} />
                 </Pie>
               </PieChart>
@@ -452,7 +452,15 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
               {result.details?.analysis?.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-sm text-primary">
                   <BadgeInfo className="w-4 h-4 text-muted shrink-0 mt-0.5" />
-                  <span dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.*?)\*\*/g, '<span class="text-primary font-medium">$1</span>') }} />
+                  <span>
+                    {item.split(/\*\*(.*?)\*\*/g).map((part, i) =>
+                      i % 2 === 1 ? (
+                        <span key={i} className="text-primary font-medium">{part}</span>
+                      ) : (
+                        <span key={i}>{part}</span>
+                      )
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>

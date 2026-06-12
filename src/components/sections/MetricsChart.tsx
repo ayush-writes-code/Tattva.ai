@@ -6,7 +6,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Activity, ShieldCheck, Zap } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import DecryptedText from "@/components/reactbits/DecryptedText";
-import Grainient from "@/components/reactbits/Grainient";
+import dynamic from "next/dynamic";
+const Grainient = dynamic(() => import("@/components/reactbits/Grainient"), { ssr: false });
 
 const DATA = [
   { name: "ViT Core", accuracy: 98.5 },
@@ -88,12 +89,12 @@ export default function MetricsDashboard() {
               <ResponsiveContainer width="100%" height="100%" minHeight={200}>
                 <BarChart data={DATA} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#4B5260" />
-                  <XAxis type="number" domain={[80, 100]} stroke="#EDEDEA" fontSize={12} />
-                  <YAxis dataKey="name" type="category" stroke="#EDEDEA" fontSize={12} axisLine={false} tickLine={false} />
+                  <XAxis type="number" domain={[80, 100]} stroke="var(--primary)" fontSize={12} />
+                  <YAxis dataKey="name" type="category" stroke="var(--primary)" fontSize={12} axisLine={false} tickLine={false} />
                   <Tooltip 
-                    cursor={{ fill: '#1A1F2E' }}
-                    contentStyle={{ backgroundColor: '#0D1117', border: '1px solid #4B5260', borderRadius: '0', color: '#EDEDEA' }}
-                    itemStyle={{ color: '#EDEDEA' }}
+                    cursor={{ fill: 'var(--border)' }}
+                    contentStyle={{ backgroundColor: '#0D1117', border: '1px solid #4B5260', borderRadius: '0', color: 'var(--primary)' }}
+                    itemStyle={{ color: 'var(--primary)' }}
                   />
                   <Bar dataKey="accuracy" fill="#FF0000" radius={[0, 4, 4, 0]} barSize={24} />
                 </BarChart>

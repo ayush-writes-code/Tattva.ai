@@ -1,7 +1,6 @@
 "use client";
 
 import React, { CSSProperties, useEffect, useRef, useState, useMemo, PropsWithChildren } from 'react';
-import * as math from 'mathjs';
 
 import './GradualBlur.css';
 
@@ -153,7 +152,9 @@ const useIntersectionObserver = (ref: React.RefObject<HTMLDivElement | null>, sh
   useEffect(() => {
     if (!shouldObserve || !ref.current) return;
 
-    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry) setIsVisible(entry.isIntersecting);
+    }, { threshold: 0.1 });
 
     observer.observe(ref.current);
     return () => observer.disconnect();
@@ -168,7 +169,7 @@ const GradualBlur: React.FC<PropsWithChildren<GradualBlurProps>> = props => {
 
   const config = useMemo(() => {
     const presetConfig = props.preset && PRESETS[props.preset] ? PRESETS[props.preset] : {};
-    return mergeConfigs(DEFAULT_CONFIG, presetConfig, props) as Required<GradualBlurProps>;
+    return mergeConfigs(DEFAULT_CONFIG, presetConfig || {}, props) as Required<GradualBlurProps>;
   }, [props]);
 
   const responsiveHeight = useResponsiveDimension(config.responsive, config, 'height');
@@ -182,7 +183,7 @@ const GradualBlur: React.FC<PropsWithChildren<GradualBlurProps>> = props => {
     const currentStrength =
       isHovered && config.hoverIntensity ? config.strength * config.hoverIntensity : config.strength;
 
-    const curveFunc = CURVE_FUNCTIONS[config.curve] || CURVE_FUNCTIONS.linear;
+    const curveFunc = CURVE_FUNCTIONS[config.curve] || CURVE_FUNCTIONS.linear || ((x: number) => x);
 
     for (let i = 1; i <= config.divCount; i++) {
       let progress = i / config.divCount;
@@ -190,15 +191,15 @@ const GradualBlur: React.FC<PropsWithChildren<GradualBlurProps>> = props => {
 
       let blurValue: number;
       if (config.exponential) {
-        blurValue = Number(math.pow(2, progress * 4)) * 0.0625 * currentStrength;
+        blurValue = Math.pow(2, progress * 4) * 0.0625 * currentStrength;
       } else {
         blurValue = 0.0625 * (progress * config.divCount + 1) * currentStrength;
       }
 
-      const p1 = math.round((increment * i - increment) * 10) / 10;
-      const p2 = math.round(increment * i * 10) / 10;
-      const p3 = math.round((increment * i + increment) * 10) / 10;
-      const p4 = math.round((increment * i + increment * 2) * 10) / 10;
+      const p1 = Math.round((increment * i - increment) * 10) / 10;
+      const p2 = Math.round(increment * i * 10) / 10;
+      const p3 = Math.round((increment * i + increment) * 10) / 10;
+      const p4 = Math.round((increment * i + increment * 2) * 10) / 10;
 
       let gradient = `transparent ${p1}%, black ${p2}%`;
       if (p3 <= 100) gradient += `, black ${p3}%`;

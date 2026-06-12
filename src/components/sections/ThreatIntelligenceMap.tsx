@@ -7,7 +7,15 @@ import { ShieldAlert, Info } from "lucide-react";
 import { countries } from "countries-list";
 import DecryptedText from "@/components/reactbits/DecryptedText";
 
-const fraudData = [
+interface FraudData {
+  country: string;
+  cases: number;
+  lat: number;
+  lng: number;
+  code: string;
+}
+
+const fraudData: FraudData[] = [
   { country: "United States", cases: 12500, lat: 37.0902, lng: -95.7129, code: "us" },
   { country: "Canada", cases: 2100, lat: 56.1304, lng: -106.3468, code: "ca" },
   { country: "Mexico", cases: 3400, lat: 23.6345, lng: -102.5528, code: "mx" },
@@ -26,7 +34,7 @@ const fraudData = [
 ];
 
 export default function ThreatIntelligenceMap() {
-  const [hoveredMarker, setHoveredMarker] = useState<any | null>(null);
+  const [hoveredMarker, setHoveredMarker] = useState<FraudData | null>(null);
 
   const markers = useMemo(() => {
     return fraudData.map((data) => ({
@@ -39,7 +47,7 @@ export default function ThreatIntelligenceMap() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden border-t border-border bg-[#080A0F] py-[100px] px-[24px] md:px-[48px]">
+    <section className="relative w-full overflow-hidden border-t border-border bg-background py-[100px] px-[24px] md:px-[48px]">
       
       {/* subtle radial glow behind the map */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,0,0,0.05)_0%,transparent_70%)] pointer-events-none z-0" />
@@ -60,7 +68,7 @@ export default function ThreatIntelligenceMap() {
       </div>
 
       <div className="relative z-10 max-w-[1200px] mx-auto w-full mb-8">
-        <div className="w-full aspect-video min-h-[400px] bg-[#0A0D14] border border-[#1A1F2E] rounded-xl overflow-hidden relative shadow-2xl">
+        <div className="w-full aspect-video min-h-[400px] bg-surface border border-border rounded-xl overflow-hidden relative shadow-2xl">
           
           <DottedMap
             className="absolute inset-0 w-full h-full p-4 pointer-events-auto"
@@ -68,13 +76,26 @@ export default function ThreatIntelligenceMap() {
             markerColor="#FF0000"
             markers={markers}
             renderMarkerOverlay={({ marker, x, y }) => {
-              const data = (marker as any).originalData;
-              const countryInfo = (countries as any)[data.code.toUpperCase()];
-              const emoji = countryInfo?.emoji || "🌐";
-              
-              return <MapMarkerHoverNode key={data.code} data={data} emoji={emoji} x={x} y={y} />;
+              const data = (marker as { originalData: FraudData }).originalData;
+              return (
+                <g
+                  key={data.code}
+                  onMouseEnter={() => setHoveredMarker({ ...data, x, y })}
+                  onMouseLeave={() => setHoveredMarker(null)}
+                  className="cursor-pointer"
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <circle cx={x} cy={y} r={2.5} fill="transparent" />
+                </g>
+              );
             }}
           />
+
+          <AnimatePresence>
+            {hoveredMarker && (
+              <MapMarkerTooltip data={hoveredMarker as FraudData & { x: number; y: number }} />
+            )}
+          </AnimatePresence>
 
         </div>
       </div>
@@ -88,52 +109,37 @@ export default function ThreatIntelligenceMap() {
   );
 }
 
-const MapMarkerHoverNode = ({ x, y, data, emoji }: { x: number; y: number; data: any; emoji: string }) => {
-  const [isHovered, setIsHovered] = useState(false);
+const MapMarkerTooltip = ({ data }: { data: FraudData & { x: number; y: number } }) => {
+  const countryInfo = (countries as unknown as Record<string, { emoji: string }>)[data.code.toUpperCase()];
+  const emoji = countryInfo?.emoji || "🌐";
+  
+  // Map SVG coordinates (0-150, 0-75) to percentages within the SVG padding box
+  const leftPct = (data.x / 150) * 100;
+  const topPct = (data.y / 75) * 100;
 
   return (
-    <g
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="cursor-pointer transition-opacity"
-      style={{ pointerEvents: 'auto' }}
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      className="absolute pointer-events-none z-50 flex flex-col justify-end items-center"
+      style={{
+        left: `calc(16px + (100% - 32px) * ${leftPct / 100})`,
+        top: `calc(16px + (100% - 32px) * ${topPct / 100})`,
+        transform: "translate(-50%, -100%)",
+        marginTop: "-12px", // offset above the dot
+      }}
     >
-      {/* Invisible hit area for better hover interaction */}
-      <circle cx={x} cy={y} r={2} fill="transparent" />
-      
-      <AnimatePresence>
-        {isHovered && (
-          <foreignObject 
-            x={x - 10} 
-            y={y - 20} 
-            width="20" 
-            height="16"
-            className="pointer-events-none"
-            style={{ overflow: "visible" }}
-          >
-            <div className="relative w-full h-full flex justify-center">
-              <motion.div
-                initial={{ opacity: 0, y: 1, scale: 0.11 }}
-                animate={{ opacity: 1, y: 0, scale: 0.11 }}
-                exit={{ opacity: 0, y: 1, scale: 0.11 }}
-                transition={{ duration: 0.2 }}
-                style={{ transformOrigin: "bottom center", width: "250px" }}
-                className="absolute bottom-0 flex flex-col justify-end items-center"
-              >
-              <div className="bg-[#080A0F]/90 backdrop-blur-md border border-[#1A1F2E] text-white px-5 py-3 rounded-lg shadow-[0_0_15px_rgba(255,0,0,0.3)] min-w-[160px] text-center">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <span className="text-xl leading-none">{emoji}</span>
-                  <span className="font-semibold text-lg text-[#EDEDEA]">{data.country}</span>
-                </div>
-                <div className="text-[#FF0000] font-mono text-base font-medium">
-                  {data.cases.toLocaleString()} cases
-                </div>
-              </div>
-            </motion.div>
-            </div>
-          </foreignObject>
-        )}
-      </AnimatePresence>
-    </g>
+      <div className="bg-background/90 backdrop-blur-md border border-border text-white px-5 py-3 rounded-lg shadow-[0_0_15px_rgba(255,0,0,0.3)] min-w-[160px] text-center">
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <span className="text-xl leading-none">{emoji}</span>
+          <span className="font-semibold text-lg text-primary">{data.country}</span>
+        </div>
+        <div className="text-[#FF0000] font-mono text-base font-medium">
+          {data.cases.toLocaleString()} cases
+        </div>
+      </div>
+    </motion.div>
   );
 };

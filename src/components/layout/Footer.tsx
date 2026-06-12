@@ -16,7 +16,7 @@ export default function Footer() {
                 <Shield className="w-5 h-5 text-primary" />
               </div>
               <span className="text-lg tracking-tight text-primary">
-                <DecryptedText text="IntrusionXSE" speed={60} maxIterations={15} animateOn="hover" />
+                <DecryptedText text="Tattva.ai" speed={60} maxIterations={15} animateOn="hover" />
               </span>
             </div>
             <p className="text-muted text-sm leading-relaxed max-w-sm">
@@ -32,7 +32,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link href="#how-it-works" className="text-sm text-muted hover:text-primary transition-colors"><DecryptedText text="How It Works" speed={60} maxIterations={15} animateOn="hover" /></Link></li>
               <li><Link href="#upload" className="text-sm text-muted hover:text-primary transition-colors"><DecryptedText text="Detection" speed={60} maxIterations={15} animateOn="hover" /></Link></li>
-              <li><a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" className="text-sm text-muted hover:text-primary transition-colors"><DecryptedText text="API Docs" speed={60} maxIterations={15} animateOn="hover" /></a></li>
+              <li><a href={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/docs` : "http://localhost:8000/docs"} target="_blank" rel="noopener noreferrer" className="text-sm text-muted hover:text-primary transition-colors"><DecryptedText text="API Docs" speed={60} maxIterations={15} animateOn="hover" /></a></li>
             </ul>
           </div>
 
@@ -53,10 +53,10 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 pt-[40px] border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-faint text-xs">
-            <DecryptedText text={`© ${new Date().getFullYear()} IntrusionX SE. Built for digital integrity.`} speed={60} maxIterations={15} animateOn="hover" />
+            <DecryptedText text={`© ${new Date().getFullYear()} Tattva.ai. Built for digital integrity.`} speed={60} maxIterations={15} animateOn="hover" />
           </p>
           <div className="flex gap-6">
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="text-faint text-xs hover:text-muted transition-colors">
+            <a href="https://github.com/ayushtomar/TattvaAI" target="_blank" rel="noopener noreferrer" className="text-faint text-xs hover:text-muted transition-colors">
               <DecryptedText text="GitHub" speed={60} maxIterations={15} animateOn="hover" />
             </a>
             <span className="text-faint text-xs">

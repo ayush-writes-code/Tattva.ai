@@ -5,7 +5,8 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import DecryptedText from "@/components/reactbits/DecryptedText";
-import ShapeGrid from "@/components/reactbits/ShapeGrid";
+import dynamic from "next/dynamic";
+const ShapeGrid = dynamic(() => import("@/components/reactbits/ShapeGrid"), { ssr: false });
 
 const MARQUEE_ITEMS = [
   "ViT Core",
@@ -21,9 +22,9 @@ const MARQUEE_ITEMS = [
 export default function StatsBar() {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const [count1, setCount1] = useState("0K+");
-  const [count2, setCount2] = useState("0.0%");
-  const [count3, setCount3] = useState("0ms");
+  const count1Ref = useRef<HTMLDivElement>(null);
+  const count2Ref = useRef<HTMLDivElement>(null);
+  const count3Ref = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     if (!containerRef.current) return;
@@ -34,9 +35,15 @@ export default function StatsBar() {
       once: true,
       onEnter: () => {
         const proxy = { c1: 0, c2: 0, c3: 0 };
-        gsap.to(proxy, { c1: 240, duration: 2, ease: "power2.out", onUpdate: () => setCount1(`${Math.round(proxy.c1)}K+`) });
-        gsap.to(proxy, { c2: 98.5, duration: 2, ease: "power2.out", onUpdate: () => setCount2(`${proxy.c2.toFixed(1)}%`) });
-        gsap.to(proxy, { c3: 24, duration: 1.2, ease: "power3.out", onUpdate: () => setCount3(`${Math.round(proxy.c3)}ms`) });
+        gsap.to(proxy, { c1: 240, duration: 2, ease: "power2.out", onUpdate: () => {
+          if (count1Ref.current) count1Ref.current.innerText = `${Math.round(proxy.c1)}K+`;
+        } });
+        gsap.to(proxy, { c2: 98.5, duration: 2, ease: "power2.out", onUpdate: () => {
+          if (count2Ref.current) count2Ref.current.innerText = `${proxy.c2.toFixed(1)}%`;
+        } });
+        gsap.to(proxy, { c3: 24, duration: 1.2, ease: "power3.out", onUpdate: () => {
+          if (count3Ref.current) count3Ref.current.innerText = `${Math.round(proxy.c3)}ms`;
+        } });
       }
     });
   }, { scope: containerRef });
@@ -48,7 +55,7 @@ export default function StatsBar() {
         <ShapeGrid 
           shape="square"
           borderColor="#3A3F4E"
-          hoverFillColor="#EDEDEA"
+          hoverFillColor="var(--primary)"
           speed={0.5}
           squareSize={50}
         />
@@ -60,8 +67,8 @@ export default function StatsBar() {
           <div className="max-w-[1200px] mx-auto px-[48px] grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0">
             
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-primary text-[clamp(48px,5vw,72px)] leading-tight mb-2">
-                {count1}
+              <div ref={count1Ref} className="text-primary text-[clamp(48px,5vw,72px)] leading-tight mb-2">
+                0K+
               </div>
               <div className="text-muted text-[10px] uppercase tracking-[0.1em]">
                 <DecryptedText text="Deepfakes Identified" speed={60} maxIterations={15} animateOn="hover" />
@@ -69,8 +76,8 @@ export default function StatsBar() {
             </div>
 
             <div className="flex flex-col items-center justify-center text-center md:border-l md:border-r border-border">
-              <div className="text-primary text-[clamp(48px,5vw,72px)] leading-tight mb-2">
-                {count2}
+              <div ref={count2Ref} className="text-primary text-[clamp(48px,5vw,72px)] leading-tight mb-2">
+                0.0%
               </div>
               <div className="text-muted text-[10px] uppercase tracking-[0.1em]">
                 <DecryptedText text="Peak Confidence Score" speed={60} maxIterations={15} animateOn="hover" />
@@ -78,8 +85,8 @@ export default function StatsBar() {
             </div>
 
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-primary text-[clamp(48px,5vw,72px)] leading-tight mb-2">
-                {count3}
+              <div ref={count3Ref} className="text-primary text-[clamp(48px,5vw,72px)] leading-tight mb-2">
+                0ms
               </div>
               <div className="text-muted text-[10px] uppercase tracking-[0.1em]">
                 <DecryptedText text="p99 Latency" speed={60} maxIterations={15} animateOn="hover" />

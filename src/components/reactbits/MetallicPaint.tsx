@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useInView } from 'framer-motion';
 import './MetallicPaint.css';
 
 const vertexShader = `#version 300 es
@@ -204,13 +205,13 @@ function processImage(img: HTMLImageElement): ImageData {
 
   for (let i = 0; i < size; i++) {
     const idx = i * 4;
-    const r = data[idx],
-      g = data[idx + 1],
-      b = data[idx + 2],
-      a = data[idx + 3];
+    const r = data[idx] || 0,
+      g = data[idx + 1] || 0,
+      b = data[idx + 2] || 0,
+      a = data[idx + 3] || 0;
     const isBackground = (r > 250 && g > 250 && b > 250 && a === 255) || a < 5;
     alphaValues[i] = isBackground ? 0 : a / 255;
-    shapeMask[i] = alphaValues[i] > 0.1 ? 1 : 0;
+    shapeMask[i] = (alphaValues[i] || 0) > 0.1 ? 1 : 0;
   }
 
   for (let y = 0; y < height; y++) {
@@ -233,7 +234,7 @@ function processImage(img: HTMLImageElement): ImageData {
   }
 
   const u = new Float32Array(size);
-  const ITERATIONS = 200;
+  const ITERATIONS = 20; // Reduced from 200 for main thread performance
   const C = 0.01;
   const omega = 1.85;
 
@@ -243,27 +244,27 @@ function processImage(img: HTMLImageElement): ImageData {
         const idx = y * width + x;
         if (!shapeMask[idx] || boundaryMask[idx]) continue;
         const sum =
-          (shapeMask[idx + 1] ? u[idx + 1] : 0) +
-          (shapeMask[idx - 1] ? u[idx - 1] : 0) +
-          (shapeMask[idx + width] ? u[idx + width] : 0) +
-          (shapeMask[idx - width] ? u[idx - width] : 0);
+          ((shapeMask[idx + 1] || 0) ? (u[idx + 1] || 0) : 0) +
+          ((shapeMask[idx - 1] || 0) ? (u[idx - 1] || 0) : 0) +
+          ((shapeMask[idx + width] || 0) ? (u[idx + width] || 0) : 0) +
+          ((shapeMask[idx - width] || 0) ? (u[idx - width] || 0) : 0);
         const newVal = (C + sum) / 4;
-        u[idx] = omega * newVal + (1 - omega) * u[idx];
+        u[idx] = omega * newVal + (1 - omega) * (u[idx] || 0);
       }
     }
   }
 
   let maxVal = 0;
-  for (let i = 0; i < size; i++) if (u[i] > maxVal) maxVal = u[i];
+  for (let i = 0; i < size; i++) if ((u[i] || 0) > maxVal) maxVal = u[i] || 0;
   if (maxVal === 0) maxVal = 1;
 
   const outData = ctx.createImageData(width, height);
   for (let i = 0; i < size; i++) {
     const px = i * 4;
-    const depth = u[i] / maxVal;
+    const depth = (u[i] || 0) / maxVal;
     const gray = Math.round(255 * (1 - depth * depth));
     outData.data[px] = outData.data[px + 1] = outData.data[px + 2] = gray;
-    outData.data[px + 3] = Math.round(alphaValues[i] * 255);
+    outData.data[px + 3] = Math.round((alphaValues[i] || 0) * 255);
   }
 
   return outData;
@@ -281,7 +282,7 @@ function hexToRgb(hex: string): [number, number, number] {
     document.body.removeChild(temp);
     
     const match = computed.match(/\d+/g);
-    if (match) {
+    if (match && match.length >= 3 && match[0] && match[1] && match[2]) {
       const r = parseInt(match[0]);
       const g = parseInt(match[1]);
       const b = parseInt(match[2]);
@@ -292,7 +293,7 @@ function hexToRgb(hex: string): [number, number, number] {
   }
 
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(targetHex);
-  return result
+  return (result && result[1] && result[2] && result[3])
     ? [parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255]
     : [1, 1, 1];
 }
@@ -335,6 +336,10 @@ export default function MetallicPaint({
 
   const [ready, setReady] = useState(false);
   const [textureReady, setTextureReady] = useState(false);
+
+  const isInView = useInView(canvasRef, { margin: "200px" });
+  const isInViewRef = useRef(isInView);
+  useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
 
   useEffect(() => {
     speedRef.current = speed;
@@ -415,11 +420,11 @@ export default function MetallicPaint({
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, imgData.width, imgData.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, imgData.data);
-    gl.uniform1i(uniforms.u_tex, 0);
+    gl.uniform1i(uniforms.u_tex || null, 0);
 
     const ratio = imgData.width / imgData.height;
-    gl.uniform1f(uniforms.u_imgRatio, ratio);
-    gl.uniform1f(uniforms.u_ratio, 1);
+    gl.uniform1f(uniforms.u_imgRatio || null, ratio);
+    gl.uniform1f(uniforms.u_ratio || null, 1);
 
     textureRef.current = tex;
     imgDataRef.current = imgData;
@@ -432,7 +437,7 @@ export default function MetallicPaint({
     const gl = glRef.current;
     if (!canvas || !gl) return;
 
-    const side = 1000 * devicePixelRatio;
+    const side = 1000 * Math.min(devicePixelRatio, 2); // Cap DPR at 2 for performance
     canvas.width = side;
     canvas.height = side;
     gl.viewport(0, 0, side, side);
@@ -441,8 +446,9 @@ export default function MetallicPaint({
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (textureRef.current && glRef.current) {
-        glRef.current.deleteTexture(textureRef.current);
+      if (gl) {
+        if (textureRef.current) gl.deleteTexture(textureRef.current);
+        if (programRef.current) gl.deleteProgram(programRef.current);
       }
     };
   }, [initGL]);
@@ -466,28 +472,28 @@ export default function MetallicPaint({
     const u = uniformsRef.current;
     if (!gl || !ready) return;
 
-    gl.uniform1f(u.u_seed, seed);
-    gl.uniform1f(u.u_scale, scale);
-    gl.uniform1f(u.u_refract, refraction);
-    gl.uniform1f(u.u_blur, blur);
-    gl.uniform1f(u.u_liquid, liquid);
-    gl.uniform1f(u.u_bright, brightness);
-    gl.uniform1f(u.u_contrast, contrast);
-    gl.uniform1f(u.u_angle, angle);
-    gl.uniform1f(u.u_fresnel, fresnel);
+    gl.uniform1f(u.u_seed || null, seed);
+    gl.uniform1f(u.u_scale || null, scale);
+    gl.uniform1f(u.u_refract || null, refraction);
+    gl.uniform1f(u.u_blur || null, blur);
+    gl.uniform1f(u.u_liquid || null, liquid);
+    gl.uniform1f(u.u_bright || null, brightness);
+    gl.uniform1f(u.u_contrast || null, contrast);
+    gl.uniform1f(u.u_angle || null, angle);
+    gl.uniform1f(u.u_fresnel || null, fresnel);
 
     const light = hexToRgb(lightColor);
     const dark = hexToRgb(darkColor);
     const tint = hexToRgb(tintColor);
-    gl.uniform3f(u.u_lightColor, light[0], light[1], light[2]);
-    gl.uniform3f(u.u_darkColor, dark[0], dark[1], dark[2]);
-    gl.uniform1f(u.u_sharp, patternSharpness);
-    gl.uniform1f(u.u_wave, waveAmplitude);
-    gl.uniform1f(u.u_noise, noiseScale);
-    gl.uniform1f(u.u_chroma, chromaticSpread);
-    gl.uniform1f(u.u_distort, distortion);
-    gl.uniform1f(u.u_contour, contour);
-    gl.uniform3f(u.u_tint, tint[0], tint[1], tint[2]);
+    gl.uniform3f(u.u_lightColor || null, light[0], light[1], light[2]);
+    gl.uniform3f(u.u_darkColor || null, dark[0], dark[1], dark[2]);
+    gl.uniform1f(u.u_sharp || null, patternSharpness);
+    gl.uniform1f(u.u_wave || null, waveAmplitude);
+    gl.uniform1f(u.u_noise || null, noiseScale);
+    gl.uniform1f(u.u_chroma || null, chromaticSpread);
+    gl.uniform1f(u.u_distort || null, distortion);
+    gl.uniform1f(u.u_contour || null, contour);
+    gl.uniform3f(u.u_tint || null, tint[0], tint[1], tint[2]);
   }, [
     ready,
     seed,
@@ -528,6 +534,12 @@ export default function MetallicPaint({
     canvas.addEventListener('mousemove', handleMouseMove);
 
     const render = (time: number) => {
+      if (!isInViewRef.current) {
+        lastTimeRef.current = time;
+        rafRef.current = requestAnimationFrame(render);
+        return;
+      }
+
       const delta = time - lastTimeRef.current;
       lastTimeRef.current = time;
 
@@ -539,7 +551,7 @@ export default function MetallicPaint({
         animTimeRef.current += delta * speedRef.current;
       }
 
-      gl.uniform1f(u.u_time, animTimeRef.current);
+      gl.uniform1f(u.u_time || null, animTimeRef.current);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       rafRef.current = requestAnimationFrame(render);
     };

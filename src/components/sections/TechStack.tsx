@@ -4,7 +4,8 @@ import { useRef } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Eye, AudioLines, Search } from "lucide-react";
 import DecryptedText from "@/components/reactbits/DecryptedText";
-import Radar from "@/components/reactbits/Radar";
+import dynamic from "next/dynamic";
+const Radar = dynamic(() => import("@/components/reactbits/Radar"), { ssr: false });
 import BorderGlow from "@/components/reactbits/BorderGlow";
 
 const MODELS = [

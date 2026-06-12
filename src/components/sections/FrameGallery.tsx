@@ -40,7 +40,7 @@ export default function FrameGallery({ frames }: FrameGalleryProps) {
       <BorderGlow
         animated={true}
         glowColor="186 100% 74%"
-        backgroundColor="#080A0F"
+        backgroundColor="var(--bg)"
         borderRadius={0}
         glowRadius={30}
         glowIntensity={0.6}

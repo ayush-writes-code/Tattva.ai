@@ -20,7 +20,7 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
   const containerRef = useRef<HTMLDivElement>(null);
   useScrollAnimation(containerRef);
 
-  const validateAndSelect = (file: File) => {
+  const validateAndSelect = useCallback((file: File) => {
     setErrorMsg(null);
     if (!file) return;
     if (file.size > 100 * 1024 * 1024) {
@@ -28,21 +28,23 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
       return;
     }
     onFileSelect(file);
-  };
+  }, [onFileSelect]);
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsHovered(false);
     if (isProcessing) return;
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      validateAndSelect(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      if (file) validateAndSelect(file);
     }
-  }, [isProcessing]);
+  }, [isProcessing, validateAndSelect]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isProcessing) return;
     if (e.target.files && e.target.files.length > 0) {
-      validateAndSelect(e.target.files[0]);
+      const file = e.target.files[0];
+      if (file) validateAndSelect(file);
     }
   };
 
@@ -98,7 +100,7 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
         <motion.p 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-primary text-sm text-center mt-4"
+          className="text-red-500 text-sm text-center mt-4"
         >
           {errorMsg}
         </motion.p>

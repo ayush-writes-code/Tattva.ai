@@ -2,7 +2,9 @@
 
 import { useRef } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import Dither from "@/components/reactbits/Dither";
+import { useReducedMotion } from "framer-motion";
+import dynamic from "next/dynamic";
+const Dither = dynamic(() => import("@/components/reactbits/Dither"), { ssr: false });
 import TextType from "@/components/reactbits/TextType";
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import { Shield, ArrowDown } from "lucide-react";
@@ -10,12 +12,13 @@ import { Shield, ArrowDown } from "lucide-react";
 export default function Hero() {
   const textRef = useRef<HTMLDivElement>(null);
   useScrollAnimation(textRef);
+  const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div id="hero-section" className="relative w-full min-h-screen flex items-center justify-center overflow-hidden py-[140px]">
+    <div id="home" className="relative w-full min-h-screen flex items-center justify-center overflow-hidden py-[140px]">
       {/* Dither WebGL Background (Monochrome) */}
       <div className="absolute inset-0 z-0 text-background">
-        <Dither waveColor={[1.0, 1.0, 1.0]} waveSpeed={0.03} />
+        {!shouldReduceMotion && <Dither waveColor={[1.0, 1.0, 1.0]} waveSpeed={0.03} />}
       </div>
 
       {/* Subtle radial gradient overlay (kept monochrome) */}
@@ -50,7 +53,7 @@ export default function Hero() {
 
           {/* Subtitle */}
           <div className="mb-12">
-            <p className="text-lg md:text-xl max-w-2xl mx-auto text-[#EDEDEA]/70">
+            <p className="text-lg md:text-xl max-w-2xl mx-auto text-primary/70">
               Multi-modal neural verification across image, video, and audio — powered by state-of-the-art forensic ensembles.
             </p>
           </div>
@@ -59,13 +62,13 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a
               href="#upload"
-              className="px-8 py-3.5 bg-[#EDEDEA] text-[#080A0F] rounded-full text-sm font-medium hover:bg-white transition-colors"
+              className="px-8 py-3.5 bg-primary text-background rounded-full text-sm font-medium hover:bg-white transition-colors"
             >
               <DecryptedText text="Start Detection" speed={60} maxIterations={12} animateOn="hover" />
             </a>
             <a
               href="#how-it-works"
-              className="px-8 py-3.5 border border-[#EDEDEA] text-[#EDEDEA] rounded-full text-sm font-medium hover:bg-[#EDEDEA] hover:text-[#080A0F] transition-colors"
+              className="px-8 py-3.5 border border-[var(--primary)] text-primary rounded-full text-sm font-medium hover:bg-primary hover:text-background transition-colors"
             >
               <DecryptedText text="How It Works" speed={60} maxIterations={12} animateOn="hover" />
             </a>

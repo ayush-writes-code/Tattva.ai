@@ -14,12 +14,32 @@ const VERDICT_COLORS: Record<string, string> = {
   ERROR: "#888888",
 };
 
+const MAX_FILES = 10;
+const MAX_TOTAL_MB = 100;
+
 export default function BatchUpload() {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [results, setResults] = useState<BatchResponse | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const addFiles = useCallback((newFiles: File[]) => {
+    setError(null);
+    setFiles((prev) => {
+      const combined = [...prev, ...newFiles];
+      if (combined.length > MAX_FILES) {
+        setError(`Maximum ${MAX_FILES} files allowed per batch.`);
+        return prev;
+      }
+      const totalSize = combined.reduce((acc, f) => acc + f.size, 0);
+      if (totalSize > MAX_TOTAL_MB * 1024 * 1024) {
+        setError(`Maximum total payload size is ${MAX_TOTAL_MB}MB.`);
+        return prev;
+      }
+      return combined;
+    });
+  }, []);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -38,14 +58,14 @@ export default function BatchUpload() {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFiles = Array.from(e.dataTransfer.files);
-      setFiles((prev) => [...prev, ...droppedFiles]);
+      addFiles(droppedFiles);
     }
-  }, []);
+  }, [addFiles]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFiles = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...selectedFiles]);
+      addFiles(selectedFiles);
     }
   };
 
@@ -80,7 +100,7 @@ export default function BatchUpload() {
     switch (verdict) {
       case "AUTHENTIC": return <CheckCircle2 className="w-4 h-4 text-[#22c55e]" />;
       case "SUSPICIOUS": return <AlertTriangle className="w-4 h-4 text-[#eab308]" />;
-      case "DEEPFAKE": return <XCircle className="w-4 h-4 text-[#ef4444]" />;
+      case "DEEPFAKE": return <XCircle className="w-4 h-4 text-red-500" />;
       default: return <FileWarning className="w-4 h-4 text-muted" />;
     }
   };
@@ -142,7 +162,7 @@ export default function BatchUpload() {
                           <button
                             onClick={(e) => { e.stopPropagation(); removeFile(i); }}
                             disabled={isProcessing}
-                            className="text-muted hover:text-[#ef4444] transition-colors disabled:opacity-50"
+                            className="text-muted hover:text-red-500 transition-colors disabled:opacity-50"
                           >
                             <XCircle className="w-4 h-4" />
                           </button>
@@ -152,7 +172,7 @@ export default function BatchUpload() {
                   </div>
 
                   {error && (
-                    <div className="mb-6 p-4 border border-[#ef4444]/30 bg-[#ef4444]/10 text-[#ef4444] text-sm">
+                    <div className="mb-6 p-4 border border-red-500/30 bg-red-500/10 text-red-500 text-sm">
                       {error}
                     </div>
                   )}
@@ -160,7 +180,7 @@ export default function BatchUpload() {
                   <button
                     onClick={(e) => { e.stopPropagation(); processBatch(); }}
                     disabled={isProcessing}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#EDEDEA] text-[#080A0F] text-sm font-medium uppercase tracking-[0.1em] hover:bg-white transition-colors disabled:opacity-50 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary text-background text-sm font-medium uppercase tracking-[0.1em] hover:bg-white transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {isProcessing ? (
                       <>
@@ -201,7 +221,7 @@ export default function BatchUpload() {
                 className="h-full"
                 animated={true}
                 glowColor="186 100% 74%"
-                backgroundColor="#080A0F"
+                backgroundColor="var(--bg)"
                 borderRadius={0}
                 glowRadius={30}
                 glowIntensity={0.6}
@@ -209,7 +229,7 @@ export default function BatchUpload() {
               >
                 <div className="h-full bg-surface border border-border p-6 flex flex-col items-center justify-center text-center">
                   <m.icon className="w-6 h-6 mb-3" style={{ color: m.color || "#4B5260" }} />
-                  <div className="text-3xl font-medium mb-1" style={{ color: m.color || "#EDEDEA" }}>{m.val}</div>
+                  <div className="text-3xl font-medium mb-1" style={{ color: m.color || "var(--primary)" }}>{m.val}</div>
                   <div className="text-[10px] uppercase tracking-widest text-muted">{m.label}</div>
                 </div>
               </BorderGlow>
@@ -241,7 +261,7 @@ export default function BatchUpload() {
                     </td>
                     <td className="p-4 text-right text-muted">{item.confidence.toFixed(1)}%</td>
                     <td className="p-4 text-right">
-                      <span className={item.authenticity_score > 60 ? "text-[#22c55e]" : item.authenticity_score < 30 ? "text-[#ef4444]" : "text-[#eab308]"}>
+                      <span className={item.authenticity_score > 60 ? "text-[#22c55e]" : item.authenticity_score < 30 ? "text-red-500" : "text-[#eab308]"}>
                         {item.authenticity_score.toFixed(1)}/100
                       </span>
                     </td>

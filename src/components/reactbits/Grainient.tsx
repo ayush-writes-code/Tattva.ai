@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
+import { useInView } from 'framer-motion';
 import { Renderer, Program, Mesh, Triangle } from 'ogl';
 import './Grainient.css';
 
@@ -32,7 +33,7 @@ interface GrainientProps {
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!result) return [1, 1, 1];
+  if (!result || !result[1] || !result[2] || !result[3]) return [1, 1, 1];
   return [parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255];
 };
 
@@ -154,8 +155,12 @@ const Grainient: React.FC<GrainientProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const isInView = useInView(containerRef, { margin: "200px", once: true });
+  const isInViewRef = useRef(isInView);
+  useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
+
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !isInView) return;
 
     const renderer = new Renderer({
       webgl: 2,
@@ -223,8 +228,10 @@ const Grainient: React.FC<GrainientProps> = ({
     let raf = 0;
     const t0 = performance.now();
     const loop = (t: number) => {
-      (program.uniforms.iTime as { value: number }).value = (t - t0) * 0.001;
-      renderer.render({ scene: mesh });
+      if (isInViewRef.current) {
+        (program.uniforms.iTime as { value: number }).value = (t - t0) * 0.001;
+        renderer.render({ scene: mesh });
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -239,6 +246,7 @@ const Grainient: React.FC<GrainientProps> = ({
       }
     };
   }, [
+    isInView,
     timeSpeed, colorBalance, warpStrength, warpFrequency, warpSpeed,
     warpAmplitude, blendAngle, blendSoftness, rotationAmount, noiseScale,
     grainAmount, grainScale, grainAnimated, contrast, gamma, saturation,

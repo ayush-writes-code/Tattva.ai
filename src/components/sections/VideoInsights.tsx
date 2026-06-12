@@ -22,7 +22,7 @@ interface VideoInsightsProps {
   insights: AiInsightsData;
 }
 
-const SEVERITY_CONFIG: Record<string, { color: string; icon: React.ElementType; bg: string }> = {
+const SEVERITY_CONFIG: Record<string, { color: string; icon: React.ComponentType<{ className?: string, style?: React.CSSProperties }>; bg: string }> = {
   critical: { color: "#ef4444", icon: ShieldAlert, bg: "rgba(239,68,68,0.08)" },
   high: { color: "#ef4444", icon: AlertCircle, bg: "rgba(239,68,68,0.06)" },
   medium: { color: "#eab308", icon: Info, bg: "rgba(234,179,8,0.06)" },
@@ -50,7 +50,7 @@ export default function VideoInsights({ insights }: VideoInsightsProps) {
       <BorderGlow
         animated={true}
         glowColor="186 100% 74%"
-        backgroundColor="#080A0F"
+        backgroundColor="var(--bg)"
         borderRadius={0}
         glowRadius={30}
         glowIntensity={0.6}
@@ -101,7 +101,7 @@ export default function VideoInsights({ insights }: VideoInsightsProps) {
       {/* Insight Cards */}
       <div className="p-4 space-y-3">
         {insights.ai_insights.map((insight, idx) => {
-          const config = SEVERITY_CONFIG[insight.severity] || SEVERITY_CONFIG.medium;
+          const config = SEVERITY_CONFIG[insight.severity] || SEVERITY_CONFIG.medium || { color: "#eab308", icon: Info as any, bg: "rgba(234,179,8,0.06)" };
           const Icon = config.icon;
 
           return (

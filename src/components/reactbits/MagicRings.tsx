@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useInView, useReducedMotion } from 'framer-motion';
 import * as THREE from 'three';
 
 import './MagicRings.css';
@@ -100,7 +101,7 @@ const resolveColor = (color: string): string => {
     
     // Parse rgb(r, g, b) or rgba(r, g, b, a) to hex
     const match = computed.match(/\d+/g);
-    if (match) {
+    if (match && match.length >= 3 && match[0] && match[1] && match[2]) {
       const r = parseInt(match[0]);
       const g = parseInt(match[1]);
       const b = parseInt(match[2]);
@@ -136,19 +137,21 @@ export default function MagicRings({
 }: MagicRingsProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const propsRef = useRef<Required<MagicRingsProps> | null>(null);
-  const mouseRef = useRef([0, 0]);
-  const smoothMouseRef = useRef([0, 0]);
+  const mouseRef = useRef<[number, number]>([0, 0]);
+  const smoothMouseRef = useRef<[number, number]>([0, 0]);
   const hoverAmountRef = useRef(0);
   const isHoveredRef = useRef(false);
   const burstRef = useRef(0);
-
-  // Pre-resolve colors to ensure WebGL gets valid strings
-  const resolvedColor = resolveColor(color);
-  const resolvedColorTwo = resolveColor(colorTwo);
+  const timeRef = useRef(0);
+  
+  const isInView = useInView(mountRef, { margin: "200px", once: true });
+  const shouldReduceMotion = useReducedMotion();
+  const isInViewRef = useRef(isInView);
+  useEffect(() => { isInViewRef.current = isInView; }, [isInView]);
 
   propsRef.current = {
-    color: resolvedColor, 
-    colorTwo: resolvedColorTwo, 
+    color, 
+    colorTwo, 
     speed, ringCount, attenuation, lineThickness,
     baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount,
     rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence,
@@ -156,8 +159,15 @@ export default function MagicRings({
   };
 
   useEffect(() => {
+    if (propsRef.current) {
+      propsRef.current.color = resolveColor(color);
+      propsRef.current.colorTwo = resolveColor(colorTwo);
+    }
+  }, [color, colorTwo]);
+
+  useEffect(() => {
     const mount = mountRef.current;
-    if (!mount) return;
+    if (!mount || !isInView) return;
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -240,9 +250,19 @@ export default function MagicRings({
     mount.addEventListener('click', onClick);
 
     let frameId: number;
+    let lastTime = performance.now();
     const animate = (t: number) => {
       frameId = requestAnimationFrame(animate);
+      const deltaTime = (t - lastTime) * 0.001;
+      lastTime = t;
+
       const p = propsRef.current!;
+
+      if (!isInViewRef.current) return;
+
+      if (!shouldReduceMotion) {
+        timeRef.current += deltaTime * p.speed;
+      }
 
       smoothMouseRef.current[0] += (mouseRef.current[0] - smoothMouseRef.current[0]) * 0.08;
       smoothMouseRef.current[1] += (mouseRef.current[1] - smoothMouseRef.current[1]) * 0.08;
@@ -250,7 +270,7 @@ export default function MagicRings({
       burstRef.current *= 0.95;
       if (burstRef.current < 0.001) burstRef.current = 0;
 
-      uniforms.uTime.value = t * 0.001 * p.speed;
+      uniforms.uTime.value = timeRef.current;
       uniforms.uAttenuation.value = p.attenuation;
       uniforms.uColor.value.set(p.color);
       uniforms.uColorTwo.value.set(p.colorTwo);
@@ -287,8 +307,10 @@ export default function MagicRings({
       mount.removeChild(renderer.domElement);
       renderer.dispose();
       material.dispose();
+      quad.geometry.dispose();
+      scene.remove(quad);
     };
-  }, []);
+  }, [isInView]);
 
   return <div ref={mountRef} className="magic-rings-container" style={blur > 0 ? { filter: `blur(${blur}px)` } : undefined} />;
 }

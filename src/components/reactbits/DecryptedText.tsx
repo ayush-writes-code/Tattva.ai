@@ -128,7 +128,7 @@ function DecryptedWord({
       {/* Absolutely positioned overlay for the scrambled text */}
       <span 
         aria-hidden="true" 
-        className={`absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none whitespace-nowrap ${isScrambling ? 'text-[#ef4444]' : ''}`}
+        className={`absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none whitespace-nowrap ${isScrambling ? 'text-red-500' : ''}`}
       >
         {displayText.split("").map((char, index) => {
           const isOriginal = char === word[index];

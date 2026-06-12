@@ -4,7 +4,8 @@ import { useRef } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Zap } from "lucide-react";
 import DecryptedText from "@/components/reactbits/DecryptedText";
-import ShapeGrid from "@/components/reactbits/ShapeGrid";
+import dynamic from "next/dynamic";
+const ShapeGrid = dynamic(() => import("@/components/reactbits/ShapeGrid"), { ssr: false });
 
 export default function CTASection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -21,7 +22,7 @@ export default function CTASection() {
         <ShapeGrid 
           shape="hexagon"
           borderColor="#3A3F4E"
-          hoverFillColor="#EDEDEA"
+          hoverFillColor="var(--primary)"
           speed={0.7}
           squareSize={40}
         />
@@ -43,7 +44,7 @@ export default function CTASection() {
 
             <a
               href="#upload"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#EDEDEA] text-[#080A0F] rounded-full text-sm font-medium hover:bg-white transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-background rounded-full text-sm font-medium hover:bg-white transition-colors"
             >
               <DecryptedText text="Start Detection" speed={60} maxIterations={12} animateOn="hover" />
               <Zap className="w-4 h-4" />
