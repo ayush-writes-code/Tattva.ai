@@ -316,7 +316,7 @@ export default function Dither({
   const isInView = useInView(containerRef, { margin: "200px" });
   const shouldReduceMotion = useReducedMotion();
 
-  const effectiveDisableAnimation = disableAnimation || shouldReduceMotion;
+  const effectiveDisableAnimation = disableAnimation || !!shouldReduceMotion;
 
   return (
     <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-auto mix-blend-screen">
