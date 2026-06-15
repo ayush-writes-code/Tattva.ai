@@ -6,6 +6,7 @@ import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "framer
 import { Home, Cpu, UploadCloud, Activity, Code2 } from "lucide-react";
 import PillNav from "@/components/reactbits/PillNav";
 import { AnimatedThemeToggler } from "@/components/ui/AnimatedThemeToggler";
+import UserMenu from "@/components/layout/UserMenu";
 
 // Dynamic import for WebGL logo to avoid SSR mismatch
 const MetallicPaint = dynamic(
@@ -95,15 +96,6 @@ export default function IntrusionXNavbar() {
       ),
       href: "https://github.com/ayushtomar/TattvaAI",
     },
-    {
-      label: (
-        <span className="flex items-center gap-2">
-          <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span className="hidden sm:inline">Account</span>
-        </span>
-      ),
-      href: "/dashboard",
-    },
   ];
 
   return (
@@ -145,6 +137,7 @@ export default function IntrusionXNavbar() {
         pillTextColor="var(--surface)" // Text color of unhovered pill
         hoveredPillTextColor="var(--primary)" // Text color when hovered inside the white circle
       />
+      <UserMenu />
       <AnimatedThemeToggler className="w-11 h-11 shrink-0 rounded-full bg-primary border border-border/10 flex items-center justify-center transition-transform hover:scale-110 shadow-sm" />
     </motion.nav>
   );
