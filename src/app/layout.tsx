@@ -20,6 +20,12 @@ const syne = Syne({
 export const metadata: Metadata = {
   title: "Tattva.ai | Deepfake Detection",
   description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
+  icons: {
+    icon: [
+      { url: '/logo-shield.svg', type: 'image/svg+xml' },
+      { url: '/logo.webp' }
+    ]
+  },
   openGraph: {
     title: "Tattva.ai | Deepfake Detection",
     description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
