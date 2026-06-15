@@ -63,8 +63,8 @@ export default function StatsBar() {
 
       <div className="relative z-10 w-full flex flex-col pt-[20px]">
         {/* Stats Counters Row */}
-        <div className="w-full py-[80px]">
-          <div className="max-w-[1200px] mx-auto px-[48px] grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0">
+        <div className="w-full py-10 md:py-[80px]">
+          <div className="max-w-[1200px] mx-auto px-6 md:px-[48px] grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0">
             
             <div className="flex flex-col items-center justify-center text-center">
               <div ref={count1Ref} className="text-primary text-[clamp(48px,5vw,72px)] leading-tight mb-2">

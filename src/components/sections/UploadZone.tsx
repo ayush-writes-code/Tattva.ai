@@ -49,7 +49,7 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
   };
 
   return (
-    <div ref={containerRef} className="w-full max-w-[1200px] mx-auto px-[48px] relative group" style={{ visibility: "hidden" }}>
+    <div ref={containerRef} className="w-full max-w-[1200px] mx-auto px-6 md:px-[48px] relative group" style={{ visibility: "hidden" }}>
       <div 
         className={cn(
           "w-full rounded-none bg-surface/50 border border-border transition-all duration-300 relative z-10 overflow-hidden",

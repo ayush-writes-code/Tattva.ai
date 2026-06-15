@@ -50,7 +50,7 @@ export default function MetricsDashboard() {
         />
       </div>
 
-      <div className="relative z-10 max-w-[1200px] mx-auto py-[140px] px-[48px]">
+      <div className="relative z-10 max-w-[1200px] mx-auto py-16 md:py-[140px] px-6 md:px-[48px]">
         <div className="flex flex-col md:flex-row justify-between items-end mb-[60px]">
           <div>
             <h2 className="text-3xl text-primary mb-[20px]">

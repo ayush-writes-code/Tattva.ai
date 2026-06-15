@@ -27,7 +27,7 @@ const VerificationSection = React.memo(({
   uploadedFile: File | null;
 }) => {
   return (
-    <section id="upload" className="relative w-full flex flex-col items-center overflow-hidden py-[140px] px-[48px]">
+    <section id="upload" className="relative w-full flex flex-col items-center overflow-hidden py-16 md:py-[140px] px-6 md:px-[48px]">
       <div className="absolute inset-0 z-0 opacity-25 pointer-events-none">
         <ShapeGrid
           shape="square"

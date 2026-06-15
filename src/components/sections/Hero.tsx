@@ -14,7 +14,7 @@ export default function Hero() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div id="home" className="relative w-full min-h-screen flex items-center justify-center overflow-hidden py-[140px]">
+    <div id="home" className="relative w-full min-h-screen flex items-center justify-center overflow-hidden py-20 md:py-[140px]">
       {/* Dither WebGL Background (Monochrome) */}
       <div className="absolute inset-0 z-0 text-background">
         <Dither waveColor={[1.0, 1.0, 1.0]} waveSpeed={0.03} />
@@ -24,7 +24,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,var(--color-background)_70%)] z-[1]" />
 
       {/* Content */}
-      <div className="relative z-10 text-center max-w-[1200px] w-full mx-auto px-[48px]">
+      <div className="relative z-10 text-center max-w-[1200px] w-full mx-auto px-6 md:px-[48px]">
         <div ref={textRef}>
           {/* Badge */}
           <div className="mb-8 flex justify-center">
@@ -35,7 +35,7 @@ export default function Hero() {
           </div>
 
           {/* Main Heading with TextType rotating questions */}
-          <h1 className="text-[clamp(52px,8vw,96px)] leading-[1.05] text-primary mb-[20px] min-h-[220px] md:min-h-[210px] flex items-center justify-center">
+          <h1 className="text-[clamp(40px,8vw,96px)] leading-[1.05] text-primary mb-[20px] min-h-[220px] md:min-h-[210px] flex items-center justify-center">
             <TextType 
               text={[
                 "Protecting Truth In The Age of AI",

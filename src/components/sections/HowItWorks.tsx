@@ -50,7 +50,7 @@ export default function HowItWorks() {
         />
       </div>
 
-      <div className="relative z-10 max-w-[1200px] mx-auto py-[140px] px-[48px]">
+      <div className="relative z-10 max-w-[1200px] mx-auto py-16 md:py-[140px] px-6 md:px-[48px]">
         <div className="text-center mb-[60px]">
           <p className="text-muted text-[10px] uppercase tracking-[0.1em] mb-[20px]">
             <DecryptedText text="Process" speed={60} maxIterations={15} animateOn="hover" />

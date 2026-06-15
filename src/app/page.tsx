@@ -4,7 +4,6 @@ import HowItWorks from "@/components/sections/HowItWorks";
 import ClientUploadSection from "@/components/sections/ClientUploadSection";
 import TechStack from "@/components/sections/TechStack";
 import MetricsChart from "@/components/sections/MetricsChart";
-import ThreatIntelligenceMap from "@/components/sections/ThreatIntelligenceMap";
 
 export default function Home() {
   return (
@@ -14,7 +13,6 @@ export default function Home() {
       <HowItWorks />
       <ClientUploadSection />
       <TechStack />
-      <ThreatIntelligenceMap />
     </div>
   );
 }

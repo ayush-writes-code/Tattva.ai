@@ -28,7 +28,7 @@ export default function CTASection() {
         />
       </div>
 
-      <div className="relative z-10 max-w-[1200px] mx-auto py-[140px] px-[48px] text-center">
+      <div className="relative z-10 max-w-[1200px] mx-auto py-16 md:py-[140px] px-6 md:px-[48px] text-center">
         <div className="p-[40px] md:p-[60px] border border-border bg-surface/80 backdrop-blur-sm relative overflow-hidden">
           <div className="relative z-10">
             <div className="w-14 h-14 border border-border bg-background flex items-center justify-center mx-auto mb-8">

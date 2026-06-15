@@ -7,7 +7,7 @@ import DecryptedText from "@/components/reactbits/DecryptedText";
 export default function Footer() {
   return (
     <footer className="w-full border-t border-border bg-background">
-      <div className="max-w-[1200px] w-full mx-auto px-[48px] py-[140px]">
+      <div className="max-w-[1200px] w-full mx-auto px-6 md:px-[48px] py-16 md:py-[140px]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="md:col-span-2">
