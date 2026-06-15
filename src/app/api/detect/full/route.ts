@@ -30,13 +30,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: "Daily limit reached. Please wait 24 hours or upgrade your plan." }, { status: 403 });
     }
 
-    // Deduct scan immediately
-    await supabase.from('profiles').update({
-      scans_today: scansToday + 1,
-      last_scan_date: today,
-      used_credits: (profile.used_credits ?? 0) + 1
-    }).eq('id', user.id);
-
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const filename = file?.name || "media_file.png";
@@ -47,16 +40,39 @@ export async function POST(req: NextRequest) {
     const isAudio = fileType.startsWith("audio/") || filename.endsWith(".mp3") || filename.endsWith(".wav");
 
     // Forward the file to the Hugging Face / Python backend
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    // Use an internal server URL instead of the public one, and read backend API key
+    const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiKey = process.env.BACKEND_API_KEY || '';
     
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+
       const backendResponse = await fetch(`${apiUrl}/detect/full`, {
         method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+        },
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!backendResponse.ok) {
         throw new Error(`Backend returned ${backendResponse.status}`);
+      }
+
+      // Backend succeeded, atomically increment the scan count using RPC
+      const { data: allowed, error: rpcError } = await supabase.rpc('increment_scan_credit', { user_id: user.id });
+      if (rpcError) {
+        console.error("Failed to increment scan credit via RPC:", rpcError);
+        // Fallback to update if RPC not created yet
+        await supabase.from('profiles').update({
+          scans_today: scansToday + 1,
+          last_scan_date: today,
+          used_credits: (profile.used_credits || 0) + 1
+        }).eq('id', user.id);
       }
 
       const backendData = await backendResponse.json();

@@ -96,6 +96,11 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pill:hover {
+  background: var(--base, #000);
 }
 
 .pill .hover-circle {
