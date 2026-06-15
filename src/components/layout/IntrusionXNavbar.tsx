@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "framer-motion";
-import { Home, Cpu, UploadCloud, Activity, Code2 } from "lucide-react";
+import { Home, Cpu, UploadCloud, Activity } from "lucide-react";
 import PillNav from "@/components/reactbits/PillNav";
 import { AnimatedThemeToggler } from "@/components/ui/AnimatedThemeToggler";
 import UserMenu from "@/components/layout/UserMenu";
@@ -86,15 +86,6 @@ export default function IntrusionXNavbar() {
         </span>
       ),
       href: "#telemetry",
-    },
-    {
-      label: (
-        <span className="flex items-center gap-2">
-          <Code2 className="w-4 h-4" />
-          <span className="hidden sm:inline">GitHub Repo</span>
-        </span>
-      ),
-      href: "https://github.com/ayushtomar/TattvaAI",
     },
   ];
 

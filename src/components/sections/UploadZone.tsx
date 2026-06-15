@@ -71,7 +71,7 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
           />
         </div>
         <label className="flex flex-col items-center justify-center p-[40px] cursor-pointer relative z-20 h-full w-full">
-          <input type="file" className="hidden" onChange={onChange} disabled={isProcessing} />
+          <input type="file" className="hidden" onChange={onChange} disabled={isProcessing} accept="image/*,video/*,audio/*" />
           
           <div className="mb-6 p-4 border border-border rounded-none bg-background group-hover:bg-surface transition-colors">
             <UploadCloud className={cn("w-8 h-8 transition-colors", isHovered ? "text-primary" : "text-muted")} />

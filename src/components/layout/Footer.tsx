@@ -55,7 +55,13 @@ export default function Footer() {
           <p className="text-faint text-xs">
             <DecryptedText text={`© ${new Date().getFullYear()} Tattva.ai. Built for digital integrity.`} speed={60} maxIterations={15} animateOn="hover" />
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap justify-center sm:justify-end gap-6">
+            <Link href="/privacy" className="text-faint text-xs hover:text-muted transition-colors">
+              <DecryptedText text="Privacy Policy" speed={60} maxIterations={15} animateOn="hover" />
+            </Link>
+            <Link href="/terms" className="text-faint text-xs hover:text-muted transition-colors">
+              <DecryptedText text="Terms of Service" speed={60} maxIterations={15} animateOn="hover" />
+            </Link>
             <a href="https://github.com/ayushtomar/TattvaAI" target="_blank" rel="noopener noreferrer" className="text-faint text-xs hover:text-muted transition-colors">
               <DecryptedText text="GitHub" speed={60} maxIterations={15} animateOn="hover" />
             </a>
