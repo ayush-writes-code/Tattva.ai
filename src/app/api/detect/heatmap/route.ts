@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
-    // Forward the file to the Hugging Face / Python backend
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ detail: "Unauthorized. Please log in to perform a scan." }, { status: 401 });
+    }
+
+    const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiKey = process.env.BACKEND_API_KEY || '';
     
     try {
       const formData = await req.formData();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 1 min timeout
+
       const backendResponse = await fetch(`${apiUrl}/detect/heatmap`, {
         method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+        },
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!backendResponse.ok) {
         throw new Error(`Backend returned ${backendResponse.status}`);

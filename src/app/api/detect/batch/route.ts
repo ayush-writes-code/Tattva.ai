@@ -35,24 +35,39 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: `Daily limit reached. You need ${requiredCredits} scans but only have ${dailyLimit - scansToday} left for today.` }, { status: 403 });
     }
 
-    // Deduct scans immediately
-    await supabase.from('profiles').update({
-      scans_today: scansToday + requiredCredits,
-      last_scan_date: today,
-      used_credits: (profile.used_credits ?? 0) + requiredCredits
-    }).eq('id', user.id);
-    
     // Forward the files to the Hugging Face / Python backend
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiKey = process.env.BACKEND_API_KEY || '';
     
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 min timeout
+
       const backendResponse = await fetch(`${apiUrl}/detect/batch`, {
         method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+        },
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!backendResponse.ok) {
         throw new Error(`Backend returned ${backendResponse.status}`);
+      }
+
+      // Backend succeeded, atomically increment the scan count using RPC
+      const { data: allowed, error: rpcError } = await supabase.rpc('increment_scan_credit', { user_id: user.id, amount: requiredCredits });
+      if (rpcError) {
+        console.error("Failed to increment scan credit via RPC:", rpcError);
+        // Fallback to update if RPC not created yet
+        await supabase.from('profiles').update({
+          scans_today: scansToday + requiredCredits,
+          last_scan_date: today,
+          used_credits: (profile.used_credits || 0) + requiredCredits
+        }).eq('id', user.id);
       }
 
       const backendData = await backendResponse.json();

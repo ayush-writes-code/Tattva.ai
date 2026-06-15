@@ -220,10 +220,14 @@ function DitheredWaves({
   });
 
   useEffect(() => {
+    const material = mesh.current?.material as THREE.ShaderMaterial;
+    const u = material?.uniforms || waveUniformsRef.current;
+    if (!u || !u.resolution) return;
+
     const dpr = gl.getPixelRatio();
     const newWidth = Math.floor(size.width * dpr);
     const newHeight = Math.floor(size.height * dpr);
-    const currentRes = waveUniformsRef.current.resolution.value;
+    const currentRes = u.resolution.value;
     if (currentRes.x !== newWidth || currentRes.y !== newHeight) {
       currentRes.set(newWidth, newHeight);
     }
@@ -231,26 +235,37 @@ function DitheredWaves({
 
   const prevColor = useRef([...waveColor]);
   useFrame((state, delta) => {
-    const u = waveUniformsRef.current;
+    const material = mesh.current?.material as THREE.ShaderMaterial;
+    if (!material || !material.uniforms) return;
 
-    if (!disableAnimation) {
+    const u = material.uniforms;
+
+    if (!disableAnimation && u.time) {
       u.time.value += delta;
     }
 
-    if (u.waveSpeed.value !== waveSpeed) u.waveSpeed.value = waveSpeed;
-    if (u.waveFrequency.value !== waveFrequency) u.waveFrequency.value = waveFrequency;
-    if (u.waveAmplitude.value !== waveAmplitude) u.waveAmplitude.value = waveAmplitude;
+    if (u.waveSpeed && u.waveSpeed.value !== waveSpeed) u.waveSpeed.value = waveSpeed;
+    if (u.waveFrequency && u.waveFrequency.value !== waveFrequency) u.waveFrequency.value = waveFrequency;
+    if (u.waveAmplitude && u.waveAmplitude.value !== waveAmplitude) u.waveAmplitude.value = waveAmplitude;
 
-    if (!prevColor.current.every((v, i) => v === waveColor[i])) {
+    if (u.waveColor && !prevColor.current.every((v, i) => v === waveColor[i])) {
       u.waveColor.value.set(...waveColor);
       prevColor.current = [...waveColor];
     }
 
-    u.enableMouseInteraction.value = enableMouseInteraction ? 1 : 0;
-    u.mouseRadius.value = mouseRadius;
+    if (u.enableMouseInteraction) u.enableMouseInteraction.value = enableMouseInteraction ? 1 : 0;
+    if (u.mouseRadius) u.mouseRadius.value = mouseRadius;
 
-    if (enableMouseInteraction) {
+    if (enableMouseInteraction && u.mousePos) {
       u.mousePos.value.copy(mouseRef.current);
+    }
+
+    // Always keep resolution in sync on the material uniforms
+    const dpr = gl.getPixelRatio();
+    const newWidth = Math.floor(size.width * dpr);
+    const newHeight = Math.floor(size.height * dpr);
+    if (u.resolution && (u.resolution.value.x !== newWidth || u.resolution.value.y !== newHeight)) {
+      u.resolution.value.set(newWidth, newHeight);
     }
   });
 
