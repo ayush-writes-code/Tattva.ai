@@ -14,7 +14,6 @@ export default function Home() {
       <HowItWorks />
       <ClientUploadSection />
       <TechStack />
-      <MetricsChart />
       <ThreatIntelligenceMap />
     </div>
   );

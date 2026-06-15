@@ -11,7 +11,6 @@ import { Shield, ArrowDown } from "lucide-react";
 
 export default function Hero() {
   const textRef = useRef<HTMLDivElement>(null);
-  useScrollAnimation(textRef);
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -26,7 +25,7 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-[1200px] w-full mx-auto px-[48px]">
-        <div ref={textRef} style={{ visibility: "hidden" }}>
+        <div ref={textRef}>
           {/* Badge */}
           <div className="mb-8 flex justify-center">
             <div className="inline-flex items-center gap-2 border border-border bg-surface px-4 py-2 rounded-full text-[10px] uppercase tracking-[0.1em] text-muted">

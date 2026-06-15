@@ -241,7 +241,7 @@ function DitheredWaves({
     const u = material.uniforms;
 
     if (!disableAnimation && u.time) {
-      u.time.value += delta;
+      u.time.value = state.clock.getElapsedTime();
     }
 
     if (u.waveSpeed && u.waveSpeed.value !== waveSpeed) u.waveSpeed.value = waveSpeed;
