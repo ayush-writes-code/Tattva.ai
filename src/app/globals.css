@@ -18,9 +18,9 @@
     --bg: #F8F9FA;
     --surface: #FFFFFF;
     --border: #E5E5E5;
-    --primary: #000000;
-    --muted: #666666;
-    --faint: #999999;
+    --primary: #0F172A;        /* Darker, better contrast */
+    --muted: #475569;
+    --faint: #64748B;
   }
 
   /* DARK MODE */
@@ -41,10 +41,16 @@
     @apply antialiased overflow-x-hidden;
   }
   
-  h1, h2 {
+  h1, h2, h3 {
     font-family: var(--font-syne);
     font-weight: 700;
     letter-spacing: -0.03em;
+    color: var(--color-primary);
+  }
+
+  /* Improve readability */
+  p, span, div {
+    color: var(--color-primary);
   }
 }
 
@@ -55,11 +61,6 @@
   
   .glass-panel {
     @apply bg-surface border border-[color:var(--color-border)];
-  }
-
-  /* Typography utilities mapped to strictly monochrome setup */
-  .text-glow {
-    /* Removed */
   }
 }
 
@@ -77,4 +78,49 @@
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+/* Fix visibility for Telemetry and other sections */
+#telemetry,
+#telemetry h1,
+#telemetry h2,
+#telemetry h3,
+#telemetry p,
+#telemetry span,
+#telemetry div {
+  color: var(--primary) !important;
+}
+
+#telemetry .text-muted,
+#telemetry .text-faint,
+#telemetry .text-gray {
+  color: var(--muted) !important;
+}
+
+/* Make sure headings are strong */
+#telemetry h2 {
+  color: var(--primary) !important;
+  opacity: 1 !important;
+}
+/* === FORCE TELEMETRY SECTION TO BE VISIBLE === */
+#telemetry,
+#telemetry *,
+#telemetry h1,
+#telemetry h2,
+#telemetry h3,
+#telemetry p,
+#telemetry span,
+#telemetry div {
+  color: #ffffff !important;     /* Pure white */
+  opacity: 1 !important;
+}
+
+/* Make headings even stronger */
+#telemetry h2 {
+  color: #f1f1f1 !important;
+  font-weight: 700 !important;
+}
+
+/* Also fix any muted text */
+.text-muted, .text-faint, .opacity-70, .text-gray {
+  color: #e5e5e5 !important;
 }

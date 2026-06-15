@@ -8,7 +8,7 @@ import PillNav from "@/components/reactbits/PillNav";
 import { AnimatedThemeToggler } from "@/components/ui/AnimatedThemeToggler";
 import UserMenu from "@/components/layout/UserMenu";
 
-// Dynamic import for WebGL logo to avoid SSR mismatch
+// Dynamic import for WebGL logo
 const MetallicPaint = dynamic(
   () => import("@/components/reactbits/MetallicPaint"),
   {
@@ -27,8 +27,6 @@ export default function IntrusionXNavbar() {
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
-    
-    // Hide navbar if scrolling down and past the very top
     if (latest > previous && latest > 150) {
       setHidden(true);
     } else {
@@ -36,66 +34,23 @@ export default function IntrusionXNavbar() {
     }
   });
 
-  // Minimal logic to highlight exact routes hash matches during scrolling
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash || "/";
       setActiveSegment(hash);
     };
     
-    // Set initial
     handleHashChange();
-    
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   const navItems = [
-    {
-      label: (
-        <span className="flex items-center gap-2">
-          <Home className="w-4 h-4" />
-          <span className="hidden sm:inline">Home</span>
-        </span>
-      ),
-      href: "/#home",
-    },
-    {
-      label: (
-        <span className="flex items-center gap-2">
-          <Cpu className="w-4 h-4" />
-          <span className="hidden sm:inline">How It Works</span>
-        </span>
-      ),
-      href: "#how-it-works",
-    },
-    {
-      label: (
-        <span className="flex items-center gap-2">
-          <UploadCloud className="w-4 h-4" />
-          <span className="hidden sm:inline">Upload</span>
-        </span>
-      ),
-      href: "#upload",
-    },
-    {
-      label: (
-        <span className="flex items-center gap-2">
-          <Activity className="w-4 h-4" />
-          <span className="hidden sm:inline">System Telemetry</span>
-        </span>
-      ),
-      href: "#telemetry",
-    },
-    {
-      label: (
-        <span className="flex items-center gap-2">
-          <Code2 className="w-4 h-4" />
-          <span className="hidden sm:inline">GitHub Repo</span>
-        </span>
-      ),
-      href: "https://github.com/ayushtomar/TattvaAI",
-    },
+    { label: <span className="flex items-center gap-2"><Home className="w-4 h-4" /><span className="hidden sm:inline">Home</span></span>, href: "/#home" },
+    { label: <span className="flex items-center gap-2"><Cpu className="w-4 h-4" /><span className="hidden sm:inline">How It Works</span></span>, href: "#how-it-works" },
+    { label: <span className="flex items-center gap-2"><UploadCloud className="w-4 h-4" /><span className="hidden sm:inline">Upload</span></span>, href: "#upload" },
+    { label: <span className="flex items-center gap-2"><Activity className="w-4 h-4" /><span className="hidden sm:inline">System Telemetry</span></span>, href: "#telemetry" },
+    { label: <span className="flex items-center gap-2"><Code2 className="w-4 h-4" /><span className="hidden sm:inline">GitHub Repo</span></span>, href: "https://github.com/ayushtomar/TattvaAI" },
   ];
 
   return (
@@ -132,13 +87,20 @@ export default function IntrusionXNavbar() {
         items={navItems}
         activeHref={activeSegment}
         initialLoadAnimation={!shouldReduceMotion}
-        baseColor="var(--bg)" // The color of the hover explosion circle
-        pillColor="var(--primary)" // Surface color of the unhovered pill
-        pillTextColor="var(--surface)" // Text color of unhovered pill
-        hoveredPillTextColor="var(--primary)" // Text color when hovered inside the white circle
+
+        baseColor="var(--surface)"
+        pillColor="var(--surface)"
+        pillTextColor="var(--primary)"
+        hoveredPillTextColor="var(--surface)"
+        hoverColor="var(--primary)"
+        activePillColor="var(--primary)"
+        activeTextColor="var(--surface)"
       />
+
       <UserMenu />
-      <AnimatedThemeToggler className="w-11 h-11 shrink-0 rounded-full bg-primary border border-border/10 flex items-center justify-center transition-transform hover:scale-110 shadow-sm" />
+      <AnimatedThemeToggler 
+        className="w-11 h-11 shrink-0 rounded-full bg-surface border border-border flex items-center justify-center transition-all hover:scale-110 shadow-sm" 
+      />
     </motion.nav>
   );
 }
