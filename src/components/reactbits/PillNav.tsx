@@ -12,7 +12,7 @@ export type PillNavItem = {
 };
 
 export interface PillNavProps {
-  logo: React.ReactNode;
+  logo?: React.ReactNode;
   logoAlt?: string;
   items: PillNavItem[];
   activeHref?: string;
@@ -87,7 +87,7 @@ const PillNav: React.FC<PillNavProps> = ({
         tlRefs.current[index]?.kill();
         const tl = gsap.timeline({ paused: true });
 
-        tl.to(circle, { scale: 1.2, xPercent: -50, duration: 2, ease, overwrite: 'auto' }, 0);
+        tl.to(circle, { scale: 2.2, xPercent: -50, duration: 2, ease, overwrite: 'auto' }, 0);
 
         if (label) {
           tl.to(label, { y: -(h + 8), duration: 2, ease, overwrite: 'auto' }, 0);
@@ -255,7 +255,7 @@ const PillNav: React.FC<PillNavProps> = ({
   return (
     <div className="pill-nav-container">
       <nav className={`pill-nav ${className}`} aria-label="Primary" style={cssVars}>
-        {isRouterLink(items?.[0]?.href) ? (
+        {logo && (isRouterLink(items?.[0]?.href) ? (
           <Link
             className="pill-logo"
             href={items?.[0]?.href || '#'}
@@ -280,7 +280,7 @@ const PillNav: React.FC<PillNavProps> = ({
           >
             <div ref={logoImgRef} className="w-full h-full flex items-center justify-center relative">{logo}</div>
           </a>
-        )}
+        ))}
 
         <div className="pill-nav-items desktop-only" ref={navItemsRef}>
           <ul className="pill-list" role="menubar">

@@ -18,7 +18,7 @@ export default function Hero() {
     <div id="home" className="relative w-full min-h-screen flex items-center justify-center overflow-hidden py-[140px]">
       {/* Dither WebGL Background (Monochrome) */}
       <div className="absolute inset-0 z-0 text-background">
-        {!shouldReduceMotion && <Dither waveColor={[1.0, 1.0, 1.0]} waveSpeed={0.03} />}
+        <Dither waveColor={[1.0, 1.0, 1.0]} waveSpeed={0.03} />
       </div>
 
       {/* Subtle radial gradient overlay (kept monochrome) */}

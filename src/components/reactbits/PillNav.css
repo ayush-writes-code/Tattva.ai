@@ -21,6 +21,7 @@
   display: flex;
   align-items: center;
   box-sizing: border-box;
+  gap: 12px;
 }
 
 @media (max-width: 768px) {
@@ -39,7 +40,6 @@
   height: var(--nav-h);
   background: var(--base, #000);
   border-radius: 9999px;
-  margin-left: 12px;
 }
 
 .pill-logo {

@@ -110,25 +110,6 @@ export default function IntrusionXNavbar() {
       className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] drop-shadow-xl flex items-center gap-4"
     >
       <PillNav
-        logo={
-          <div className="w-[34px] h-[34px] rounded-full overflow-hidden relative border border-border/50 shadow-sm transition-colors duration-300">
-            <MetallicPaint
-              imageSrc="/logo-shield.svg"
-              lightColor="var(--primary)"
-              darkColor="var(--bg)"
-              tintColor="var(--muted)"
-              speed={0.2}
-              scale={3}
-              brightness={1.8}
-              contrast={0.6}
-              liquid={0.6}
-              blur={0.01}
-              refraction={0.015}
-              fresnel={1.2}
-              mouseAnimation={true}
-            />
-          </div>
-        }
         items={navItems}
         activeHref={activeSegment}
         initialLoadAnimation={!shouldReduceMotion}
