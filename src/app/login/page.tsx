@@ -1,11 +1,9 @@
 'use client'
 
 import { Suspense, useState, useTransition } from 'react'
-import { login, signup, signInWithProvider, resetPassword } from './actions'
+import { signInWithProvider } from './actions'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-
-type AuthTab = 'signin' | 'signup' | 'reset'
 
 function GoogleIcon() {
   return (
@@ -43,40 +41,6 @@ function LoadingSpinner() {
   )
 }
 
-function PasswordStrength({ password }: { password: string }) {
-  const getStrength = () => {
-    let score = 0
-    if (password.length >= 6) score++
-    if (password.length >= 10) score++
-    if (/[A-Z]/.test(password)) score++
-    if (/[0-9]/.test(password)) score++
-    if (/[^A-Za-z0-9]/.test(password)) score++
-    return score
-  }
-
-  const strength = getStrength()
-  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Excellent']
-  const colors = ['', 'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-emerald-500', 'bg-emerald-400']
-
-  if (!password) return null
-
-  return (
-    <div className="space-y-1.5 mt-1">
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              i <= strength ? colors[strength] : 'bg-[var(--faint)]'
-            }`}
-          />
-        ))}
-      </div>
-      <p className="text-xs text-muted">{labels[strength]}</p>
-    </div>
-  )
-}
-
 export default function LoginPage() {
   return (
     <Suspense fallback={
@@ -93,17 +57,13 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const message = searchParams.get('message')
   const messageType = searchParams.get('type') || 'error'
-  const initialTab = searchParams.get('tab') as AuthTab | null
 
-  const [activeTab, setActiveTab] = useState<AuthTab>(initialTab || 'signin')
   const [isPending, startTransition] = useTransition()
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
-  const [signupPassword, setSignupPassword] = useState('')
 
   const handleOAuth = (provider: 'google' | 'github' | 'discord') => {
     setOauthLoading(provider)
     startTransition(async () => {
-      const formData = new FormData()
       await signInWithProvider(provider)
     })
   }
@@ -184,7 +144,7 @@ function LoginForm() {
         <div className="flex flex-col justify-center p-8 sm:p-12 bg-surface border border-border rounded-2xl lg:rounded-l-none lg:rounded-r-2xl">
           
           {/* Mobile branding */}
-          <div className="lg:hidden flex items-center gap-3 mb-6">
+          <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center">
               <svg className="w-5 h-5 text-[var(--bg)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -193,256 +153,62 @@ function LoginForm() {
             <span className="text-xl font-bold font-syne text-primary">Tattva.ai</span>
           </div>
 
-          {/* Tab Headers */}
-          {activeTab !== 'reset' && (
-            <div className="flex mb-8">
-              <button
-                onClick={() => setActiveTab('signin')}
-                className={`flex-1 pb-3 text-sm font-medium border-b-2 transition-all duration-200 ${
-                  activeTab === 'signin'
-                    ? 'border-[var(--primary)] text-primary'
-                    : 'border-transparent text-muted hover:text-primary'
-                }`}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => setActiveTab('signup')}
-                className={`flex-1 pb-3 text-sm font-medium border-b-2 transition-all duration-200 ${
-                  activeTab === 'signup'
-                    ? 'border-[var(--primary)] text-primary'
-                    : 'border-transparent text-muted hover:text-primary'
-                }`}
-              >
-                Create Account
-              </button>
-            </div>
-          )}
-
-          {activeTab === 'reset' && (
-            <div className="mb-6">
-              <button
-                onClick={() => setActiveTab('signin')}
-                className="text-muted hover:text-primary text-sm flex items-center gap-1.5 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Login
-              </button>
-            </div>
-          )}
-
           {/* Page Title */}
-          <div className="mb-6">
+          <div className="mb-8">
             <h1 className="text-2xl font-bold font-syne text-primary">
-              {activeTab === 'signin' && 'Welcome Back'}
-              {activeTab === 'signup' && 'Get Started'}
-              {activeTab === 'reset' && 'Reset Password'}
+              Welcome to Tattva
             </h1>
-            <p className="text-muted text-sm mt-1">
-              {activeTab === 'signin' && 'Log in to access your dashboard and scans.'}
-              {activeTab === 'signup' && 'Create your account and get 10 free scans.'}
-              {activeTab === 'reset' && 'Enter your email and we\'ll send a reset link.'}
+            <p className="text-muted text-sm mt-2">
+              Log in or create an account instantly to get 10 free scans.
             </p>
           </div>
 
           {/* Status Message */}
           {message && (
-            <div className={`mb-6 p-3.5 rounded-xl border text-sm ${messageBgColor} animate-in fade-in slide-in-from-top-2 duration-300`}>
+            <div className={`mb-8 p-3.5 rounded-xl border text-sm ${messageBgColor} animate-in fade-in slide-in-from-top-2 duration-300`}>
               {message}
             </div>
           )}
 
-          {/* Social Login Buttons (not shown on reset) */}
-          {activeTab !== 'reset' && (
-            <>
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                {[
-                  { provider: 'google' as const, icon: <GoogleIcon />, label: 'Google' },
-                  { provider: 'github' as const, icon: <GitHubIcon />, label: 'GitHub' },
-                  { provider: 'discord' as const, icon: <DiscordIcon />, label: 'Discord' },
-                ].map(({ provider, icon, label }) => (
-                  <button
-                    key={provider}
-                    onClick={() => handleOAuth(provider)}
-                    disabled={isPending || !!oauthLoading}
-                    className="flex items-center justify-center gap-2 py-2.5 px-3 border border-border rounded-xl hover:bg-[var(--bg)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                  >
-                    {oauthLoading === provider ? (
-                      <LoadingSpinner />
-                    ) : (
-                      <>
-                        <span className="group-hover:scale-110 transition-transform duration-200">
-                          {icon}
-                        </span>
-                        <span className="text-xs text-muted hidden sm:inline">{label}</span>
-                      </>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Divider */}
-              <div className="relative mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-surface text-muted">or continue with email</span>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Login Form */}
-          {activeTab === 'signin' && (
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-primary mb-1.5" htmlFor="signin-email">
-                  Email
-                </label>
-                <input
-                  id="signin-email"
-                  className="w-full rounded-xl px-4 py-2.5 bg-[var(--bg)] border border-border text-primary placeholder-[var(--faint)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/50 transition-all duration-200 outline-none text-sm"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-medium text-primary" htmlFor="signin-password">
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('reset')}
-                    className="text-xs text-muted hover:text-primary transition-colors"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-                <input
-                  id="signin-password"
-                  className="w-full rounded-xl px-4 py-2.5 bg-[var(--bg)] border border-border text-primary placeholder-[var(--faint)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/50 transition-all duration-200 outline-none text-sm"
-                  type="password"
-                  name="password"
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
+          {/* Social Login Buttons */}
+          <div className="flex flex-col gap-4">
+            {[
+              { provider: 'google' as const, icon: <GoogleIcon />, label: 'Continue with Google' },
+              { provider: 'github' as const, icon: <GitHubIcon />, label: 'Continue with GitHub' },
+              { provider: 'discord' as const, icon: <DiscordIcon />, label: 'Continue with Discord' },
+            ].map(({ provider, icon, label }) => (
               <button
-                formAction={login}
-                disabled={isPending}
-                className="w-full flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--bg)] rounded-xl px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                key={provider}
+                onClick={() => handleOAuth(provider)}
+                disabled={isPending || !!oauthLoading}
+                className="flex items-center justify-center gap-3 py-3.5 px-4 border border-border rounded-xl hover:bg-[var(--bg)] hover:border-primary/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group w-full"
               >
-                {isPending ? <><LoadingSpinner /> Logging in...</> : 'Login'}
+                {oauthLoading === provider ? (
+                  <LoadingSpinner />
+                ) : (
+                  <>
+                    <span className="group-hover:scale-110 transition-transform duration-200">
+                      {icon}
+                    </span>
+                    <span className="text-sm font-medium text-primary">{label}</span>
+                  </>
+                )}
               </button>
-            </form>
-          )}
+            ))}
+          </div>
 
-          {/* Sign Up Form */}
-          {activeTab === 'signup' && (
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-primary mb-1.5" htmlFor="signup-email">
-                  Email
-                </label>
-                <input
-                  id="signup-email"
-                  className="w-full rounded-xl px-4 py-2.5 bg-[var(--bg)] border border-border text-primary placeholder-[var(--faint)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/50 transition-all duration-200 outline-none text-sm"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-primary mb-1.5" htmlFor="signup-name">
-                  Full Name
-                </label>
-                <input
-                  id="signup-name"
-                  className="w-full rounded-xl px-4 py-2.5 bg-[var(--bg)] border border-border text-primary placeholder-[var(--faint)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/50 transition-all duration-200 outline-none text-sm"
-                  name="full_name"
-                  type="text"
-                  placeholder="John Doe"
-                  required
-                  autoComplete="name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-primary mb-1.5" htmlFor="signup-password">
-                  Password
-                </label>
-                <input
-                  id="signup-password"
-                  className="w-full rounded-xl px-4 py-2.5 bg-[var(--bg)] border border-border text-primary placeholder-[var(--faint)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/50 transition-all duration-200 outline-none text-sm"
-                  type="password"
-                  name="password"
-                  placeholder="Min. 6 characters"
-                  required
-                  autoComplete="new-password"
-                  minLength={6}
-                  onChange={(e) => setSignupPassword(e.target.value)}
-                />
-                <PasswordStrength password={signupPassword} />
-              </div>
-              <button
-                formAction={signup}
-                disabled={isPending}
-                className="w-full flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--bg)] rounded-xl px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-              >
-                {isPending ? <><LoadingSpinner /> Creating account...</> : 'Create Account'}
-              </button>
-              <p className="text-center text-xs text-muted mt-2">
-                By signing up, you agree to our{' '}
-                <Link href="#" className="text-primary hover:underline">Terms</Link>
-                {' '}and{' '}
-                <Link href="#" className="text-primary hover:underline">Privacy Policy</Link>
-              </p>
-            </form>
-          )}
-
-          {/* Reset Password Form */}
-          {activeTab === 'reset' && (
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-primary mb-1.5" htmlFor="reset-email">
-                  Email Address
-                </label>
-                <input
-                  id="reset-email"
-                  className="w-full rounded-xl px-4 py-2.5 bg-[var(--bg)] border border-border text-primary placeholder-[var(--faint)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/50 transition-all duration-200 outline-none text-sm"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-              <button
-                formAction={resetPassword}
-                disabled={isPending}
-                className="w-full flex items-center justify-center gap-2 bg-[var(--primary)] text-[var(--bg)] rounded-xl px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isPending ? <><LoadingSpinner /> Sending...</> : 'Send Reset Link'}
-              </button>
-            </form>
-          )}
+          <p className="text-center text-xs text-muted mt-8">
+            By continuing, you agree to our{' '}
+            <Link href="#" className="text-primary hover:underline">Terms</Link>
+            {' '}and{' '}
+            <Link href="#" className="text-primary hover:underline">Privacy Policy</Link>
+          </p>
 
           {/* Mobile free credits badge */}
-          {activeTab === 'signup' && (
-            <div className="lg:hidden mt-6 flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--bg)] border border-border rounded-xl">
-              <span className="text-lg">🎁</span>
-              <p className="text-primary text-sm font-medium">10 free scans included</p>
-            </div>
-          )}
+          <div className="lg:hidden mt-8 flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--bg)] border border-border rounded-xl">
+            <span className="text-lg">🎁</span>
+            <p className="text-primary text-sm font-medium">10 free scans included</p>
+          </div>
         </div>
       </div>
     </div>

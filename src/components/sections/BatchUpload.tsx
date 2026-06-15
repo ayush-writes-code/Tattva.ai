@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { UploadCloud, CheckCircle2, AlertTriangle, XCircle, FileWarning, Layers, Clock, Activity, RefreshCw } from "lucide-react";
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import BorderGlow from "@/components/reactbits/BorderGlow";
 import { detectBatch, BatchResponse, BatchResultItem } from "@/lib/api";
+import { createClient } from "@/utils/supabase/client";
 
 const VERDICT_COLORS: Record<string, string> = {
   AUTHENTIC: "#22c55e",
@@ -23,6 +25,8 @@ export default function BatchUpload() {
   const [results, setResults] = useState<BatchResponse | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const supabase = createClient();
 
   const addFiles = useCallback((newFiles: File[]) => {
     setError(null);
@@ -76,6 +80,13 @@ export default function BatchUpload() {
   const processBatch = async () => {
     if (files.length === 0) return;
     
+    // Check auth
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      router.push("/login?message=Please log in to use the deepfake scanner");
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
     setResults(null);

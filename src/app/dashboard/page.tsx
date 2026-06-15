@@ -21,10 +21,21 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single()
 
-  const credits = profile?.free_credits ?? 10
-  const usedCredits = profile?.used_credits ?? 0
-  const remaining = credits - usedCredits
-  const progressPercent = credits > 0 ? (usedCredits / credits) * 100 : 0
+  // Enforce onboarding
+  if (!profile?.nickname && !user.user_metadata?.nickname) {
+    redirect('/onboarding')
+  }
+
+  // Daily limit logic
+  const dailyLimit = 10;
+  // Check if the last_scan_date is today. If not, effectively the user has 0 scans today in the UI.
+  // The backend API will actually update the database when they scan.
+  const today = new Date().toISOString().split('T')[0];
+  const isToday = profile?.last_scan_date === today;
+  const scansToday = isToday ? (profile?.scans_today ?? 0) : 0;
+  
+  const remaining = Math.max(0, dailyLimit - scansToday);
+  const progressPercent = (scansToday / dailyLimit) * 100;
 
   // SVG circular progress values
   const radius = 54
@@ -33,11 +44,7 @@ export default async function DashboardPage() {
 
   // User display info
   const avatarUrl = user.user_metadata?.avatar_url as string | undefined
-  const displayName =
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.email?.split('@')[0] ??
-    'User'
+  const displayName = profile?.nickname ?? user.user_metadata?.nickname ?? 'User'
   const email = user.email ?? ''
   const initials = email.slice(0, 2).toUpperCase()
   const memberSince = new Date(user.created_at).toLocaleDateString('en-US', {
@@ -107,10 +114,10 @@ export default async function DashboardPage() {
           <div className="group rounded-2xl border border-border bg-surface p-6 transition-all duration-300 hover:border-faint">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-syne text-sm font-semibold uppercase tracking-wider text-muted">
-                Scan Credits
+                Daily Scans
               </h3>
               <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-medium text-muted">
-                10 Free Credits
+                {dailyLimit} Free / Day
               </span>
             </div>
 
@@ -153,9 +160,9 @@ export default async function DashboardPage() {
               <div className="flex-1 space-y-3">
                 <div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted">Used</span>
+                    <span className="text-muted">Used Today</span>
                     <span className="font-medium text-primary">
-                      {usedCredits} / {credits}
+                      {scansToday} / {dailyLimit}
                     </span>
                   </div>
                   <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-background">
@@ -166,8 +173,7 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 <p className="text-xs leading-relaxed text-muted">
-                  Each scan uses 1 credit. Credits refresh on the free tier
-                  monthly.
+                  Each scan uses 1 credit. Credits refresh automatically every 24 hours.
                 </p>
               </div>
             </div>

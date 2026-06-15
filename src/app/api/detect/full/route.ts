@@ -1,7 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ detail: "Unauthorized. Please log in to perform a scan." }, { status: 401 });
+    }
+
+    // Check daily limits
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('scans_today, last_scan_date, used_credits')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      return NextResponse.json({ detail: "Failed to load user profile." }, { status: 500 });
+    }
+
+    const dailyLimit = 10;
+    const today = new Date().toISOString().split('T')[0];
+    const isToday = profile.last_scan_date === today;
+    const scansToday = isToday ? (profile.scans_today ?? 0) : 0;
+
+    if (scansToday >= dailyLimit) {
+      return NextResponse.json({ detail: "Daily limit reached. Please wait 24 hours or upgrade your plan." }, { status: 403 });
+    }
+
+    // Deduct scan immediately
+    await supabase.from('profiles').update({
+      scans_today: scansToday + 1,
+      last_scan_date: today,
+      used_credits: (profile.used_credits ?? 0) + 1
+    }).eq('id', user.id);
+
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const filename = file?.name || "media_file.png";
