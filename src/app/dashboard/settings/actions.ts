@@ -13,13 +13,11 @@ export async function updateProfile(formData: FormData) {
   }
   
   const nickname = formData.get('nickname') as string
-  const avatarUrl = formData.get('avatar_url') as string
   
   // Update Auth Metadata
   const { error } = await supabase.auth.updateUser({
     data: {
       nickname: nickname,
-      avatar_url: avatarUrl
     }
   })
   
@@ -30,7 +28,6 @@ export async function updateProfile(formData: FormData) {
   // Update public.profiles table
   const { error: profileError } = await supabase.from('profiles').update({
     nickname: nickname,
-    avatar_url: avatarUrl
   }).eq('id', user.id)
   
   if (profileError) {

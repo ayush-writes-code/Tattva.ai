@@ -50,19 +50,6 @@ export default function SettingsForm({ user }: { user: any }) {
           />
         </div>
         
-        <div>
-          <label htmlFor="avatar_url" className="block text-sm font-medium text-primary">Avatar URL</label>
-          <input
-            type="url"
-            id="avatar_url"
-            name="avatar_url"
-            defaultValue={user.user_metadata?.avatar_url || ''}
-            placeholder="https://example.com/avatar.png"
-            className="mt-2 block w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-primary placeholder-muted focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition-all"
-          />
-          <p className="mt-1.5 text-xs text-muted">Provide a direct link to an image (e.g. from Imgur or GitHub).</p>
-        </div>
-        
         <div className="pt-2">
           <button
             type="submit"

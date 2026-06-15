@@ -67,7 +67,7 @@ export default function IntrusionXNavbar() {
           <span className="hidden sm:inline">How It Works</span>
         </span>
       ),
-      href: "#how-it-works",
+      href: "/#how-it-works",
     },
     {
       label: (
@@ -76,7 +76,7 @@ export default function IntrusionXNavbar() {
           <span className="hidden sm:inline">Upload</span>
         </span>
       ),
-      href: "#upload",
+      href: "/#upload",
     },
     {
       label: (
@@ -85,7 +85,7 @@ export default function IntrusionXNavbar() {
           <span className="hidden sm:inline">System Telemetry</span>
         </span>
       ),
-      href: "#telemetry",
+      href: "/#telemetry",
     },
   ];
 
