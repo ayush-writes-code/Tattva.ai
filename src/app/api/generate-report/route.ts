@@ -2,17 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    // Simulate short network delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const formData = await req.formData();
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-    return NextResponse.json({
-      report_path: "/mock-report.pdf",
-      download_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-      report_id: "REP-MOCK-908B1",
-      verdict: "DEEPFAKE",
-      confidence: 0.89
+    const backendResponse = await fetch(`${apiUrl}/generate-report`, {
+      method: 'POST',
+      body: formData,
     });
+
+    if (!backendResponse.ok) {
+      throw new Error(`Backend returned ${backendResponse.status}`);
+    }
+
+    const backendData = await backendResponse.json();
+
+    return NextResponse.json(backendData);
   } catch (err) {
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    console.error("Report generation failed:", err);
+    return NextResponse.json({ error: "Failed to connect to backend report generator" }, { status: 500 });
   }
 }

@@ -42,41 +42,51 @@ export async function POST(req: NextRequest) {
       used_credits: (profile.used_credits ?? 0) + requiredCredits
     }).eq('id', user.id);
     
-    // Simulate short network delay
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // Forward the files to the Hugging Face / Python backend
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    
+    try {
+      const backendResponse = await fetch(`${apiUrl}/detect/batch`, {
+        method: 'POST',
+        body: formData,
+      });
 
-    const results = files.map((file, idx) => {
-      const isFake = idx % 2 === 0;
-      return {
-        file_name: file.name,
-        media_type: file.type.split("/")[0] || "image",
-        verdict: isFake ? "DEEPFAKE" : "AUTHENTIC",
-        confidence: isFake ? 0.88 + (idx * 0.01) : 0.95 - (idx * 0.01),
-        authenticity_score: isFake ? 12 + (idx * 2) : 95 - (idx * 2),
-        risk_level: isFake ? "CRITICAL" : "LOW"
-      };
-    });
+      if (!backendResponse.ok) {
+        throw new Error(`Backend returned ${backendResponse.status}`);
+      }
 
-    const deepfakesCount = results.filter(r => r.verdict === "DEEPFAKE").length;
-    const authenticCount = results.length - deepfakesCount;
+      const backendData = await backendResponse.json();
 
-    return NextResponse.json({
-      summary: {
-        total_files: files.length,
-        images: files.filter(f => f.type.startsWith("image/")).length,
-        videos: files.filter(f => f.type.startsWith("video/")).length,
-        audio: files.filter(f => f.type.startsWith("audio/")).length,
-        errors: 0,
-        deepfakes_detected: deepfakesCount,
-        suspicious_files: 0,
-        authentic_files: authenticCount,
-        average_confidence: 0.91,
-        average_authenticity_score: 55.4,
-        batch_verdict: deepfakesCount > 0 ? "HIGH_RISK" : "SECURE",
-        total_processing_time: 3.2
-      },
-      results
-    });
+      return NextResponse.json(backendData);
+    } catch (fetchError) {
+      console.error("Backend fetch failed:", fetchError);
+      
+      // Fallback response if the backend is unreachable
+      return NextResponse.json({
+        summary: {
+          total_files: files.length,
+          images: files.filter(f => f.type.startsWith("image/")).length,
+          videos: files.filter(f => f.type.startsWith("video/")).length,
+          audio: files.filter(f => f.type.startsWith("audio/")).length,
+          errors: files.length,
+          deepfakes_detected: 0,
+          suspicious_files: 0,
+          authentic_files: 0,
+          average_confidence: 0,
+          average_authenticity_score: 0,
+          batch_verdict: "ERROR",
+          total_processing_time: 0
+        },
+        results: files.map(file => ({
+          file_name: file.name,
+          media_type: file.type.split("/")[0] || "image",
+          verdict: "ERROR",
+          confidence: 0,
+          authenticity_score: 0,
+          risk_level: "UNKNOWN"
+        }))
+      }, { status: 503 });
+    }
   } catch (err) {
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
