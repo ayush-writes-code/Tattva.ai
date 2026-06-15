@@ -23,8 +23,8 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
   const validateAndSelect = useCallback((file: File) => {
     setErrorMsg(null);
     if (!file) return;
-    if (file.size > 100 * 1024 * 1024) {
-      setErrorMsg("Payload exceeds maximum capacity (100MB)");
+    if (file.size > 4.5 * 1024 * 1024) {
+      setErrorMsg("Payload exceeds Vercel Serverless capacity (4.5MB)");
       return;
     }
     onFileSelect(file);
@@ -81,7 +81,7 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
             <DecryptedText text="Drop Media to Verify" speed={60} maxIterations={15} animateOn="hover" />
           </h3>
           <p className="text-muted text-sm mb-6 text-center max-w-sm">
-            <DecryptedText text="Support for Images (JPG, PNG), Video (MP4, MOV), and Audio (MP3, WAV) up to 100MB." speed={60} maxIterations={15} animateOn="hover" />
+            <DecryptedText text="Support for Images (JPG, PNG), Video (MP4, MOV), and Audio (MP3, WAV) up to 4.5MB." speed={60} maxIterations={15} animateOn="hover" />
           </p>
           
           <div className="flex gap-4 mb-8">

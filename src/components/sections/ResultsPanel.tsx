@@ -155,6 +155,9 @@ const TemporalChart = ({ timeline }: { timeline: { frame: number; timestamp: num
 
 /* ── Annotated Video Player ─────────────────────────────── */
 const AnnotatedVideoPlayer = ({ videoSrc }: { videoSrc: string }) => {
+  const isRawBase64 = videoSrc && !videoSrc.startsWith('http') && !videoSrc.startsWith('/') && !videoSrc.startsWith('data:');
+  const finalSrc = isRawBase64 ? `data:video/mp4;base64,${videoSrc}` : videoSrc;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -187,7 +190,7 @@ const AnnotatedVideoPlayer = ({ videoSrc }: { videoSrc: string }) => {
           </div>
           <div className="relative bg-background">
             <video
-              src={videoSrc}
+              src={finalSrc}
               controls
               className="w-full h-auto max-h-[500px] block"
               playsInline
