@@ -62,6 +62,7 @@ export interface ForensicsData {
   heatmap?: string;
   noisemap?: string;
   spectrogram?: string;
+  audio_spectrogram?: string;
   waveform?: string;
   suspicious_frames?: SuspiciousFrame[];
   frame_confidence_timeline?: { frame: number; timestamp: number; confidence: number; verdict: string }[];

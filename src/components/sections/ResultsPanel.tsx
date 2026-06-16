@@ -298,7 +298,7 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
     { name: "Remaining", value: 100 - result.confidence },
   ];
 
-  const hasForensicImages = forensics?.heatmap || forensics?.noisemap || forensics?.spectrogram || forensics?.waveform;
+  const hasForensicImages = forensics?.heatmap || forensics?.noisemap || forensics?.spectrogram || forensics?.audio_spectrogram || forensics?.waveform;
   const hasSuspiciousFrames = forensics?.suspicious_frames && forensics.suspicious_frames.length > 0;
   const hasTimeline = forensics?.frame_confidence_timeline && forensics.frame_confidence_timeline.length > 0;
   const hasAnnotatedVideo = !!forensics?.annotated_video;
@@ -411,6 +411,7 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
 
             {/* Audio forensics */}
             {forensics?.spectrogram && <ForensicCard title="Mel-Spectrogram" description="Frequency content — check for comb artifacts" imageSrc={forensics.spectrogram} icon={AudioLines} />}
+            {forensics?.audio_spectrogram && <ForensicCard title="Audio Spectrogram" description="Linear frequency content — analyze fine details" imageSrc={forensics.audio_spectrogram} icon={AudioLines} />}
             {forensics?.waveform && <ForensicCard title="Audio Waveform" description="Amplitude — check for unnatural consistency" imageSrc={forensics.waveform} icon={Waves} />}
 
             {/* Video: temporal chart spans full width */}
