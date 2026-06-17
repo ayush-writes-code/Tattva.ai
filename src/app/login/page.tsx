@@ -99,7 +99,7 @@ function LoginForm() {
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
               </div>
-              <span className="text-2xl font-bold font-syne text-primary">Tattva.ai</span>
+              <span className="text-2xl font-bold font-sans tracking-tight text-primary">Tattva.ai</span>
             </div>
             
             <h2 className="text-3xl font-bold font-syne text-primary leading-tight mb-4">
@@ -150,7 +150,7 @@ function LoginForm() {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
             </div>
-            <span className="text-xl font-bold font-syne text-primary">Tattva.ai</span>
+            <span className="text-xl font-bold font-sans tracking-tight text-primary">Tattva.ai</span>
           </div>
 
           {/* Page Title */}

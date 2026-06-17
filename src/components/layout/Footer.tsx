@@ -11,10 +11,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <img src="/logo.png" alt="Tattva.ai Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg tracking-tight text-primary">
-                <DecryptedText text="Tattva.ai" speed={60} maxIterations={15} animateOn="hover" />
+            <div className="flex items-center gap-4 mb-4">
+              <img src="/logo.png" alt="Tattva.ai Logo" className="w-16 h-16 object-contain" />
+              <span className="text-3xl font-semibold tracking-tight text-primary font-sans">
+                Tattva.ai
               </span>
             </div>
             <p className="text-muted text-sm leading-relaxed max-w-sm">
