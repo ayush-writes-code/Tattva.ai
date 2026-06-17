@@ -50,7 +50,16 @@ const VerificationSection = React.memo(({
 
         <UploadZone onFileSelect={onFileSelect} isProcessing={isProcessing} />
 
-        {!isProcessing && !result && <TrustBadge />}
+        {!isProcessing && !result && (
+          <>
+            <TrustBadge />
+            <div className="w-full max-w-[900px] mx-auto mt-8 px-4">
+              <p className="text-[11px] text-muted text-center leading-relaxed border border-border/30 bg-surface/20 p-4 rounded-sm">
+                <span className="text-primary font-medium">Disclaimer:</span> This tool is for informational purposes only. AI detection models are not 100% accurate and can produce false positives or false negatives. We accept no liability for any decisions, damages, or actions resulting from the use of this tool. All uploaded media is subject to a strict zero-retention policy and is securely purged immediately after analysis.
+              </p>
+            </div>
+          </>
+        )}
 
         {isProcessing && (
           <motion.div
