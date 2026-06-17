@@ -23,8 +23,7 @@ export const metadata: Metadata = {
   description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
   icons: {
     icon: [
-      { url: '/logo-shield.svg', type: 'image/svg+xml' },
-      { url: '/logo.webp' }
+      { url: '/logo.png' }
     ]
   },
   openGraph: {
@@ -34,7 +33,7 @@ export const metadata: Metadata = {
     siteName: "Tattva.ai",
     images: [
       {
-        url: "/logo.webp",
+        url: "/logo.png",
         width: 1200,
         height: 630,
         alt: "Tattva.ai Deepfake Detection System",
@@ -47,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tattva.ai | Deepfake Detection",
     description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
-    images: ["/logo.webp"],
+    images: ["/logo.png"],
   },
 };
 

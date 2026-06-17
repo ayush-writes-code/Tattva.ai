@@ -108,6 +108,7 @@ export default function IntrusionXNavbar() {
         pillColor="var(--primary)" // Surface color of the unhovered pill
         pillTextColor="var(--surface)" // Text color of unhovered pill
         hoveredPillTextColor="var(--primary)" // Text color when hovered inside the white circle
+        logo={<img src="/logo.png" alt="Tattva.ai" className="w-8 h-8 object-contain drop-shadow-md" />}
       />
       <UserMenu />
       <AnimatedThemeToggler className="w-11 h-11 shrink-0 rounded-full bg-primary border border-border/10 flex items-center justify-center transition-transform hover:scale-110 shadow-sm" />
