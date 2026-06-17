@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { DetectionResponse, ForensicsData, generateReport, getReportDownloadUrl } from "@/lib/api";
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
@@ -292,17 +292,6 @@ export default function ResultsPanel({ result, forensics = {}, uploadedFile }: R
   const isError = result.verdict === "ERROR";
   const verdictColor = VERDICT_COLORS[result.verdict] || VERDICT_COLORS.ERROR;
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-
-  useEffect(() => {
-    if (!result) return;
-    try {
-      if (result.verdict === "AUTHENTIC") {
-        new Audio('/authentic.mp3').play().catch(e => console.warn('Audio playback failed', e));
-      } else if (result.verdict === "DEEPFAKE" || result.verdict === "SUSPICIOUS") {
-        new Audio('/deepfake.mp3').play().catch(e => console.warn('Audio playback failed', e));
-      }
-    } catch (e) {}
-  }, [result]);
 
   const chartData = [
     { name: "Confidence", value: result.confidence },
