@@ -128,10 +128,16 @@ export const generateReport = async (file: File): Promise<ReportResponse> => {
 };
 
 export const getReportDownloadUrl = (downloadPath: string): string => {
+  let path = downloadPath;
   if (downloadPath.startsWith("http://") || downloadPath.startsWith("https://")) {
-    return downloadPath;
+    try {
+      const url = new URL(downloadPath);
+      path = url.pathname + url.search;
+    } catch (e) {
+      // ignore
+    }
   }
-  return `/api/download-report?path=${encodeURIComponent(downloadPath)}`;
+  return `/api/download-report?path=${encodeURIComponent(path)}`;
 };
 
 export interface BatchSummary {
