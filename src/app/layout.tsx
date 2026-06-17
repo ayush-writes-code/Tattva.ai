@@ -18,6 +18,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tattva.ai"),
   title: "Tattva.ai | Deepfake Detection",
   description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
   icons: {
@@ -33,10 +34,10 @@ export const metadata: Metadata = {
     siteName: "Tattva.ai",
     images: [
       {
-        url: "/logo.webp",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Tattva.ai Logo",
+        alt: "Tattva.ai Deepfake Detection System",
       },
     ],
     locale: "en_US",
@@ -46,9 +47,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tattva.ai | Deepfake Detection",
     description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
-    images: ["/logo.webp"],
+    images: ["/og-image.png"],
   },
 };
+
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({
   children,
@@ -78,6 +81,7 @@ export default function RootLayout({
             curve="ease-out"
           />
         </SmoothScrollProvider>
+        <Analytics />
       </body>
     </html>
   );

@@ -131,7 +131,11 @@ export const getReportDownloadUrl = (downloadPath: string): string => {
   if (downloadPath.startsWith("http://") || downloadPath.startsWith("https://")) {
     return downloadPath;
   }
-  return `${API_BASE_URL}${downloadPath}`;
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  // Ensure we don't have double slashes if downloadPath starts with a slash
+  const cleanBackendUrl = backendUrl.endsWith('/') ? backendUrl.slice(0, -1) : backendUrl;
+  const cleanDownloadPath = downloadPath.startsWith('/') ? downloadPath : `/${downloadPath}`;
+  return `${cleanBackendUrl}${cleanDownloadPath}`;
 };
 
 export interface BatchSummary {
