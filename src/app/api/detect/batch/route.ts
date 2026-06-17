@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: "Failed to load user profile." }, { status: 500 });
     }
 
-    const dailyLimit = 10;
+    const isAdmin = process.env.ADMIN_EMAILS?.split(',').includes(user.email ?? '') ?? false;
+    const dailyLimit = isAdmin ? Infinity : 10;
     const today = new Date().toISOString().split('T')[0];
     const isToday = profile.last_scan_date === today;
     const scansToday = isToday ? (profile.scans_today ?? 0) : 0;

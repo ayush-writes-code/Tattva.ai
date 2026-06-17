@@ -27,7 +27,8 @@ export default async function DashboardPage() {
   }
 
   // Daily limit logic
-  const dailyLimit = 10;
+  const isAdmin = process.env.ADMIN_EMAILS?.split(',').includes(user.email ?? '') ?? false;
+  const dailyLimit = isAdmin ? Infinity : 10;
   // Check if the last_scan_date is today. If not, effectively the user has 0 scans today in the UI.
   // The backend API will actually update the database when they scan.
   const today = new Date().toISOString().split('T')[0];
@@ -35,7 +36,7 @@ export default async function DashboardPage() {
   const scansToday = isToday ? (profile?.scans_today ?? 0) : 0;
   
   const remaining = Math.max(0, dailyLimit - scansToday);
-  const progressPercent = (scansToday / dailyLimit) * 100;
+  const progressPercent = isAdmin ? 100 : (scansToday / dailyLimit) * 100;
 
   // SVG circular progress values
   const radius = 54
@@ -117,7 +118,7 @@ export default async function DashboardPage() {
                 Daily Scans
               </h3>
               <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-medium text-muted">
-                {dailyLimit} Free / Day
+                {isAdmin ? "Unlimited Scans" : `${dailyLimit} Free / Day`}
               </span>
             </div>
 
@@ -150,7 +151,7 @@ export default async function DashboardPage() {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="font-syne text-3xl font-bold text-primary">
-                    {remaining}
+                    {isAdmin ? "∞" : remaining}
                   </span>
                   <span className="text-xs text-muted">remaining</span>
                 </div>
@@ -162,7 +163,7 @@ export default async function DashboardPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted">Used Today</span>
                     <span className="font-medium text-primary">
-                      {scansToday} / {dailyLimit}
+                      {isAdmin ? "Unlimited" : `${scansToday} / ${dailyLimit}`}
                     </span>
                   </div>
                   <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-background">
