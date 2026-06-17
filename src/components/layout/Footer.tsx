@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-4 mb-4">
-              <img src="/logo.png" alt="Tattva.ai Logo" className="w-16 h-16 object-contain" />
+              <img src="/logo.png" alt="Tattva.ai Logo" className="w-32 h-32 object-contain" />
               <span className="text-3xl font-semibold tracking-tight text-primary font-sans">
                 Tattva.ai
               </span>

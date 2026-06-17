@@ -107,7 +107,7 @@ export default function IntrusionXNavbar() {
         baseColor="var(--bg)" // The color of the hover explosion circle
         pillColor="var(--primary)" // Surface color of the unhovered pill
         pillTextColor="var(--surface)" // Text color of unhovered pill
-        logo={<img src="/logo.png" alt="Tattva.ai" className="w-full h-full object-contain drop-shadow-md scale-125" />}
+        logo={<img src="/logo.png" alt="Tattva.ai" className="w-full h-full object-contain drop-shadow-md scale-[1.75]" />}
       />
       <UserMenu />
       <AnimatedThemeToggler className="w-11 h-11 shrink-0 rounded-full bg-primary border border-border/10 flex items-center justify-center transition-transform hover:scale-110 shadow-sm" />
