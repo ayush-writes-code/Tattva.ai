@@ -40,6 +40,11 @@ export const AnimatedThemeToggler = ({
     const button = buttonRef.current
     if (!button) return
 
+    try {
+      const audio = new Audio('/perfect-fart.mp3')
+      audio.play().catch(e => console.warn('Audio playback failed', e))
+    } catch (e) {}
+
     const { top, left, width, height } = button.getBoundingClientRect()
     const x = left + width / 2
     const y = top + height / 2
