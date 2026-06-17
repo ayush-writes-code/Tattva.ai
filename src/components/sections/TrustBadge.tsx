@@ -51,12 +51,7 @@ export default function TrustBadge() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * idx, duration: 0.4 }}
                 whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                className="group relative flex flex-col items-center text-center p-5 border border-border/50 overflow-hidden h-full"
-                style={{
-                  background: "rgba(13, 17, 23, 0.6)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                }}
+                className="group relative flex flex-col items-center text-center p-5 border border-border/50 overflow-hidden h-full bg-background/60 backdrop-blur-md"
               >
                 {/* Subtle glow on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -73,7 +68,7 @@ export default function TrustBadge() {
                   <DecryptedText text={badge.label} speed={60} maxIterations={12} animateOn="hover" />
                 </h4>
 
-                <p className="text-[10px] text-faint leading-relaxed relative z-10">
+                <p className="text-[10px] text-muted leading-relaxed relative z-10">
                   {badge.description}
                 </p>
               </motion.div>
