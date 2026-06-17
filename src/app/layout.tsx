@@ -18,7 +18,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tattva.ai"),
+  metadataBase: new URL("https://tattva-ai-prototype.vercel.app/"),
   title: "Tattva.ai | Deepfake Detection",
   description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
   icons: {
