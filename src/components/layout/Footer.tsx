@@ -30,7 +30,6 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link href="#how-it-works" className="text-sm text-muted hover:text-primary transition-colors"><DecryptedText text="How It Works" speed={60} maxIterations={15} animateOn="hover" /></Link></li>
               <li><Link href="#upload" className="text-sm text-muted hover:text-primary transition-colors"><DecryptedText text="Detection" speed={60} maxIterations={15} animateOn="hover" /></Link></li>
-              <li><a href={process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/docs` : "http://localhost:8000/docs"} target="_blank" rel="noopener noreferrer" className="text-sm text-muted hover:text-primary transition-colors"><DecryptedText text="API Docs" speed={60} maxIterations={15} animateOn="hover" /></a></li>
             </ul>
           </div>
 
