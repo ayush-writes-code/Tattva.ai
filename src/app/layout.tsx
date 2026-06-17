@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Tattva.ai | Deepfake Detection",
     description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
-    url: "https://tattva.ai",
+    url: "https://tattva-ai-prototype.vercel.app/",
     siteName: "Tattva.ai",
     images: [
       {
-        url: "/og-image.png",
+        url: "/logo.webp",
         width: 1200,
         height: 630,
         alt: "Tattva.ai Deepfake Detection System",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tattva.ai | Deepfake Detection",
     description: "AI-Powered Deepfake Detection System with multi-modal neural network verifications.",
-    images: ["/og-image.png"],
+    images: ["/logo.webp"],
   },
 };
 
