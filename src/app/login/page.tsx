@@ -32,6 +32,22 @@ function DiscordIcon() {
   )
 }
 
+function XIcon() {
+  return (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.262 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.5 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  )
+}
+
+function FacebookIcon() {
+  return (
+    <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  )
+}
+
 function LoadingSpinner() {
   return (
     <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -61,7 +77,7 @@ function LoginForm() {
   const [isPending, startTransition] = useTransition()
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
 
-  const handleOAuth = (provider: 'google' | 'github' | 'discord') => {
+  const handleOAuth = (provider: 'google' | 'github' | 'discord' | 'x' | 'facebook') => {
     setOauthLoading(provider)
     startTransition(async () => {
       await signInWithProvider(provider)
@@ -176,6 +192,8 @@ function LoginForm() {
               { provider: 'google' as const, icon: <GoogleIcon />, label: 'Continue with Google' },
               { provider: 'github' as const, icon: <GitHubIcon />, label: 'Continue with GitHub' },
               { provider: 'discord' as const, icon: <DiscordIcon />, label: 'Continue with Discord' },
+              { provider: 'x' as const, icon: <XIcon />, label: 'Continue with X' },
+              { provider: 'facebook' as const, icon: <FacebookIcon />, label: 'Continue with Facebook' },
             ].map(({ provider, icon, label }) => (
               <button
                 key={provider}

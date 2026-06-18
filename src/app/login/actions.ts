@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { headers } from 'next/headers'
 
-export async function signInWithProvider(provider: 'google' | 'github' | 'discord') {
+export async function signInWithProvider(provider: 'google' | 'github' | 'discord' | 'x' | 'facebook') {
   const supabase = await createClient()
   const headerStore = await headers()
   const origin = headerStore.get('origin') || ''
