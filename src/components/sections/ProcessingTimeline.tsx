@@ -10,7 +10,7 @@ import BorderGlow from "@/components/reactbits/BorderGlow";
 const STEPS = [
   "Intercepting Payload",
   "Extracting Metadata Signatures",
-  "Running Neural Ensemble (ViT/Swin)",
+  "Running Neural Analysis (ViT)",
   "Cross-referencing Audio Spectrums",
   "Formulating Verdict",
 ];

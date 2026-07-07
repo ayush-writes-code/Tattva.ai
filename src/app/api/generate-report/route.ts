@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ detail: "Unauthorized. Please log in to perform a scan." }, { status: 401 });
-    }
-
     const formData = await req.formData();
     const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const apiKey = process.env.BACKEND_API_KEY || '';

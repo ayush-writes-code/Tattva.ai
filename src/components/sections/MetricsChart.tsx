@@ -11,7 +11,7 @@ const Grainient = dynamic(() => import("@/components/reactbits/Grainient"), { ss
 
 const DATA = [
   { name: "ViT Core", accuracy: 98.5 },
-  { name: "Swin Trans", accuracy: 96.2 },
+  { name: "Spectral Analysis", accuracy: 96.2 },
   { name: "Wav2Vec2", accuracy: 97.9 },
   { name: "ELA Forensics", accuracy: 94.5 },
 ];

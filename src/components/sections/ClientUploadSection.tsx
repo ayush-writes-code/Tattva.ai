@@ -11,7 +11,6 @@ import TrustBadge from "@/components/sections/TrustBadge";
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import ShapeGrid from "@/components/reactbits/ShapeGrid";
 import { detectMedia, DetectionResponse, ForensicsData } from "@/lib/api";
-import { createClient } from "@/utils/supabase/client";
 
 const VerificationSection = React.memo(({
   onFileSelect,
@@ -89,7 +88,6 @@ export default function ClientUploadSection() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [mode, setMode] = useState<"single" | "batch">("single");
   const router = useRouter();
-  const supabase = createClient();
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -100,12 +98,6 @@ export default function ClientUploadSection() {
   }, []);
 
   const handleFileUpload = useCallback(async (file: File) => {
-    // Check auth first
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      router.push("/login?message=Please log in to use the deepfake scanner");
-      return;
-    }
 
     setIsProcessing(true);
     setResult(null);

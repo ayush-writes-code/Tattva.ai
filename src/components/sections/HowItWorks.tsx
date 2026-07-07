@@ -19,7 +19,7 @@ const STEPS = [
     num: "02",
     icon: Cpu,
     title: "Neural Analysis",
-    desc: "Our ensemble of ViT, Swin Transformer, and Wav2Vec2 models dissect the media across multiple forensic dimensions.",
+    desc: "Our ensemble of ViT and Wav2Vec2 models dissect the media across multiple forensic dimensions.",
   },
   {
     num: "03",

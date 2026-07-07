@@ -1,42 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ detail: "Unauthorized. Please log in to perform a scan." }, { status: 401 });
-    }
-
     const formData = await req.formData();
     const files = formData.getAll("files") as File[];
-    
-    // Check daily limits
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('scans_today, last_scan_date, used_credits')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError) {
-      return NextResponse.json({ detail: "Failed to load user profile." }, { status: 500 });
-    }
-
-    const isAdmin = process.env.ADMIN_EMAILS?.split(',').includes(user.email ?? '') ?? false;
-    const dailyLimit = isAdmin ? Infinity : 10;
-    const today = new Date().toISOString().split('T')[0];
-    const isToday = profile.last_scan_date === today;
-    const scansToday = isToday ? (profile.scans_today ?? 0) : 0;
-    
-    const requiredCredits = files.length;
-
-    if (scansToday + requiredCredits > dailyLimit) {
-      return NextResponse.json({ detail: `Daily limit reached. You need ${requiredCredits} scans but only have ${dailyLimit - scansToday} left for today.` }, { status: 403 });
-    }
 
     // Forward the files to the Hugging Face / Python backend
     const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -59,18 +28,6 @@ export async function POST(req: NextRequest) {
 
       if (!backendResponse.ok) {
         throw new Error(`Backend returned ${backendResponse.status}`);
-      }
-
-      // Backend succeeded, atomically increment the scan count using RPC
-      const { data: allowed, error: rpcError } = await supabase.rpc('increment_scan_credit', { user_id: user.id, amount: requiredCredits });
-      if (rpcError) {
-        console.error("Failed to increment scan credit via RPC:", rpcError);
-        // Fallback to update if RPC not created yet
-        await supabase.from('profiles').update({
-          scans_today: scansToday + requiredCredits,
-          last_scan_date: today,
-          used_credits: (profile.used_credits || 0) + requiredCredits
-        }).eq('id', user.id);
       }
 
       const backendData = await backendResponse.json();

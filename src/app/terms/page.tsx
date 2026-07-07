@@ -71,7 +71,7 @@ export default function TermsOfServicePage() {
         <section className="space-y-4">
           <h2 className="text-2xl font-bold font-syne text-primary">3. Disclaimer of Verdict Accuracy</h2>
           <p>
-            Our software relies on deep-learning models (e.g., Vision Transformers, Swin Transformers, Wav2Vec 2.0) and forensic algorithms (Error Level Analysis) to evaluate media.
+            Our software relies on deep-learning models (e.g., Vision Transformers, Wav2Vec 2.0) and forensic algorithms (Error Level Analysis) to evaluate media.
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>

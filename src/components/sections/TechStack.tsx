@@ -18,9 +18,9 @@ const MODELS = [
   },
   {
     icon: Eye,
-    name: "Swin Transformer",
+    name: "Spectral Analysis",
     tag: "Image Detection",
-    desc: "Hierarchical vision model with shifted window attention. Excels at detecting AI-generated content from Midjourney, DALL·E, and Stable Diffusion.",
+    desc: "Advanced frequency domain analysis. Excels at detecting invisible artifacts left behind by AI synthesis engines and compression algorithms.",
     accuracy: "96.2%",
   },
   {

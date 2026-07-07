@@ -11,7 +11,7 @@ const ShapeGrid = dynamic(() => import("@/components/reactbits/ShapeGrid"), { ss
 const MARQUEE_ITEMS = [
   "ViT Core",
   "Wav2Vec2-XLSR",
-  "Swin Transformer",
+  "Error Level Analysis",
   "ELA Forensics",
   "GaryStefford Model",
   "Neural Ensemble",

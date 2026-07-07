@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return new NextResponse("Unauthorized. Please log in to download reports.", { status: 401 });
-    }
-
     const { searchParams } = new URL(req.url);
     const path = searchParams.get("path");
 

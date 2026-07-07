@@ -40,7 +40,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3">
               <li><span className="text-sm text-muted"><DecryptedText text="Vision Transformer" speed={60} maxIterations={15} animateOn="hover" /></span></li>
-              <li><span className="text-sm text-muted"><DecryptedText text="Swin Transformer" speed={60} maxIterations={15} animateOn="hover" /></span></li>
+              <li><span className="text-sm text-muted"><DecryptedText text="Error Level Analysis" speed={60} maxIterations={15} animateOn="hover" /></span></li>
               <li><span className="text-sm text-muted"><DecryptedText text="Wav2Vec2-XLSR" speed={60} maxIterations={15} animateOn="hover" /></span></li>
               <li><span className="text-sm text-muted"><DecryptedText text="ELA Forensics" speed={60} maxIterations={15} animateOn="hover" /></span></li>
             </ul>
