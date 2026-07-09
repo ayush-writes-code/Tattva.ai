@@ -1,0 +1,50 @@
+# Tattva.AI — Full Stack Docker Compose
+# Run both frontend and backend with a single command:
+#   docker compose up --build
+#
+# Prerequisites:
+#   - Docker Desktop installed
+#   - intrusionx-backend repo cloned next to TattvaAI:
+#     Downloads/
+#     ├── TattvaAI/          (this project)
+#     └── intrusionx-backend/ (the Python API)
+
+services:
+  # ── Backend (FastAPI + AI Models) ────────────────────────
+  backend:
+    build:
+      context: ../intrusionx-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:7860"
+    environment:
+      - BACKEND_API_KEY=  # Empty = no API key required locally
+      - HF_TOKEN=${HF_TOKEN:-}  # Optional: for gated models
+    volumes:
+      - backend-temp:/app/temp
+      - backend-reports:/app/outputs/reports
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Frontend (Next.js) ──────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - BACKEND_URL=http://backend:7860
+      - BACKEND_API_KEY=  # Must match backend's key
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend-temp:
+  backend-reports:

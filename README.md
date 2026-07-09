@@ -9,6 +9,7 @@
   [![Frontend](https://img.shields.io/badge/Frontend-Next.js_15-blue?logo=next.js)](#)
   [![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](#)
   [![AI](https://img.shields.io/badge/AI_Engine-PyTorch-red?logo=pytorch)](#)
+  [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](#)
 </div>
 
 ---
@@ -21,17 +22,19 @@ Designed for **HackHalt**, this system isn't just a basic prototype—it's a har
 ## ✨ Core Technical Capabilities
 
 ### 📷 Dual-Ensemble Image Forensics
-- **Vision Transformer (ViT)**: Evaluates structural anomalies using `dima806/deepfake_vs_real`.
-- **Swin Transformer**: Catches synthetic generation markers specific to Stable Diffusion & Midjourney using `umm-maybe/AI-image-detector`.
-- **Error Level Analysis (ELA)**: Computes byte-level discrepancies to identify manipulated ("photoshopped") regions.
-- **Auto Face-Cropping**: OpenCV Haar Cascades automatically isolate facial features to run localized anomaly detection.
+- **Vision Transformer (ViT)**: Fine-tuned deepfake face detector using `prithivMLmods/Deep-Fake-Detector-v2-Model` (92% precision).
+- **Swin Transformer**: Catches AI-generated image markers using `umm-maybe/AI-image-detector`.
+- **Error Level Analysis (ELA)**: Computes byte-level discrepancies to identify manipulated regions (conservative calibration — max ±2 point influence).
+- **DCT Frequency Analysis**: Detects GAN checkerboard artifacts in the frequency domain (corroboration-gated — only activates when models agree).
+- **Auto Face-Cropping**: OpenCV Haar Cascades automatically isolate facial features for localized anomaly detection.
 
 ### 🎬 Temporal Video Analysis
-- **Smart Frame Sampling**: Rejects uniform sampling in favor of scene-change detection to ensure the AI analyzes diverse structural content rather than duplicated frames.
+- **Smart Frame Sampling**: Scene-change detection ensures the AI analyzes diverse structural content rather than duplicated frames.
 - **Max-Mean Aggregation**: Prevents single-frame glitches from ruining the verdict while ensuring consistent deepfakes are caught.
 
 ### 🎙️ Audio Deepfake Detection
-- **Wav2Vec 2.0**: Employs fine-tuned transformer architectures (`Melina/deepfake_audio_detection`) to detect synthetic intonation patterns.
+- **Wav2Vec 2.0 (Model A)**: `garystafford/wav2vec2-deepfake-voice-detector` — detects TTS from ElevenLabs, Amazon Polly, Kokoro, etc.
+- **Wav2Vec 2.0 (Model B)**: `MelodyMachine/Deepfake-audio-detection-V2` — complementary detection for broader coverage.
 - **Spectrographic Visualization**: Generates Mel-Spectrograms mapped against standard human frequency bounds.
 
 ---
@@ -47,9 +50,9 @@ graph TD
     
     subgraph Backend Pipeline
         Backend --> Router{Media Router}
-        Router -->|Image| ID[Image Pipeline\nViT + Swin + ELA]
+        Router -->|Image| ID[Image Pipeline\nViT + Swin + ELA + DCT]
         Router -->|Video| VD[Video Pipeline\nFrame Extraction]
-        Router -->|Audio| AD[Audio Pipeline\nWav2Vec 2.0]
+        Router -->|Audio| AD[Audio Pipeline\nWav2Vec 2.0 Dual-Model]
         
         VD --> ID
     end
@@ -66,11 +69,34 @@ graph TD
 
 ## 🚀 Local Installation
 
-The project is split into two independent repositories for microservice compliance.
+### Option A: Docker Compose (Recommended)
 
-### 1. Start the API Backend (`/intrusionx-se`)
+The fastest way to run the full stack — no Python env, no Node env, one command:
+
 ```bash
-cd intrusionx-se
+git clone https://github.com/ayush-writes-code/Tattva.ai.git
+cd Tattva.ai
+
+# Make sure intrusionx-backend is cloned alongside this repo:
+# Downloads/
+# ├── Tattva.ai/            (this repo)
+# └── intrusionx-backend/   (the Python API)
+
+docker compose up --build
+```
+
+| Service  | URL                    |
+|----------|------------------------|
+| Frontend | http://localhost:3000   |
+| Backend  | http://localhost:8000   |
+
+> **Note**: First build takes 5-10 minutes (downloads AI models). Subsequent runs use Docker cache.
+
+### Option B: Manual Setup
+
+#### 1. Start the API Backend
+```bash
+cd intrusionx-backend
 
 # Create a virtual environment
 python3 -m venv venv
@@ -83,15 +109,15 @@ pip install -r requirements.txt
 uvicorn api:app --reload --port 8000
 ```
 
-### 2. Start the Frontend (`/intrusionx-frontend`)
+#### 2. Start the Frontend
 ```bash
-cd intrusionx-frontend
+cd Tattva.ai
 
 # Install dependencies
 npm install
 
-# Set the backend URL in a .env file (Points to local backend)
-echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env
+# Create environment file
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
 
 # Run the development server
 npm run dev
@@ -99,12 +125,28 @@ npm run dev
 
 ---
 
+## 🤖 AI Models Used
+
+| Model | Type | Architecture | What It Detects |
+|-------|------|-------------|-----------------|
+| `prithivMLmods/Deep-Fake-Detector-v2-Model` | Image | ViT (Vision Transformer) | Face-swapped deepfakes, GAN-generated faces |
+| `umm-maybe/AI-image-detector` | Image | Swin Transformer | AI-generated art (Stable Diffusion, Midjourney, DALL-E) |
+| `garystafford/wav2vec2-deepfake-voice-detector` | Audio | Wav2Vec2-XLSR | TTS voices (ElevenLabs, Polly, Kokoro, Hume) |
+| `MelodyMachine/Deepfake-audio-detection-V2` | Audio | Wav2Vec2 | Complementary synthetic voice detection |
+
+### Ensemble Strategy
+- **Face detected**: ViT model weighted 70%, Swin 30% (ViT excels at face analysis)
+- **No face**: Swin model weighted 90%, ViT 10% (Swin excels at general AI art)
+- **Forensic layers** (ELA + DCT): Max ±5 points, only when models already lean toward fake (corroboration-gated)
+
+---
+
 ## ☁️ Deployment Specifications
 
-IntrusionX SE is fully configured for cloud deployment:
-- **Backend**: Containerized via `Dockerfile` using `python:3.9-slim`. It automatically installs OpenGL system proxies (`libgl1`, `libglib2.0-0`) required for headless OpenCV processing. Hosted on **Hugging Face Spaces**.
-- **Frontend**: Edge-optimized **Next.js** build specifically routed to allow large 100MB+ media uploads, hosted on **Vercel**.
-- **CORS Hardening**: Strict origin rules enforced on the backend to prevent cross-site request forgery outside of the verified Vercel subnet.
+- **Backend**: Containerized via `Dockerfile` using `python:3.11-slim`. Hosted on **Hugging Face Spaces** with API key protection.
+- **Frontend**: Edge-optimized **Next.js** build on **Vercel**. Supports 100MB+ media uploads.
+- **Docker Compose**: Full-stack containerization for local development with proper service networking.
+- **CORS Hardening**: Strict origin rules enforced on the backend.
 
 ## 📈 Roadmap & Future Enhancements
 - **Redis Caching Layer**: To store inference hashes and prevent redundant AI processing of identical files.

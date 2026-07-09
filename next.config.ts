@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   transpilePackages: ['@react-three/fiber', 'three', '@react-three/postprocessing'],
   poweredByHeader: false,
