@@ -21,6 +21,8 @@ services:
       - BACKEND_API_KEY=  # Empty = no API key required locally
       - HF_TOKEN=${HF_TOKEN:-}  # Optional: for gated models
     restart: unless-stopped
+    volumes:
+      - hf-cache:/home/appuser/.cache/huggingface
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860/')"]
       interval: 30s
@@ -42,3 +44,6 @@ services:
       - backend
     restart: unless-stopped
 
+
+volumes:
+  hf-cache:
