@@ -20,12 +20,9 @@ services:
     environment:
       - BACKEND_API_KEY=  # Empty = no API key required locally
       - HF_TOKEN=${HF_TOKEN:-}  # Optional: for gated models
-    volumes:
-      - backend-temp:/app/temp
-      - backend-reports:/app/outputs/reports
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860/')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,6 +42,3 @@ services:
       - backend
     restart: unless-stopped
 
-volumes:
-  backend-temp:
-  backend-reports:
