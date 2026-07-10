@@ -127,9 +127,8 @@ def _do_preload():
         print(f"[API] Image models preload failed: {e}")
         
     try:
-        from detectors.audio_detector import _load_model as _load_audio_model, _load_model_b as _load_audio_model_b
-        _load_audio_model()
-        _load_audio_model_b()
+        # Temporarily skipping audio models to speed up startup for presentation
+        print("[API] Audio models preload skipped by user request.")
     except Exception as e:
         print(f"[API] Audio models preload failed: {e}")
         
