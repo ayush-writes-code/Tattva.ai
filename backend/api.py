@@ -121,8 +121,8 @@ import asyncio
 def _do_preload():
     print("[API] Preloading AI models in the background thread...")
     try:
-        from detectors.image_detector import _load_model_a
-        _load_model_a()
+        from detectors.image_detector import preload_models as preload_image_models
+        preload_image_models()
     except Exception as e:
         print(f"[API] Image models preload failed: {e}")
         
