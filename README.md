@@ -77,11 +77,7 @@ The fastest way to run the full stack — no Python env, no Node env, one comman
 git clone https://github.com/ayush-writes-code/Tattva.ai.git
 cd Tattva.ai
 
-# Make sure intrusionx-backend is cloned alongside this repo:
-# Downloads/
-# ├── Tattva.ai/            (this repo)
-# └── intrusionx-backend/   (the Python API)
-
+# The backend is included in the /backend folder
 docker compose up --build
 ```
 
@@ -96,7 +92,7 @@ docker compose up --build
 
 #### 1. Start the API Backend
 ```bash
-cd intrusionx-backend
+cd backend
 
 # Create a virtual environment
 python3 -m venv venv

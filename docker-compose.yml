@@ -13,7 +13,7 @@ services:
   # ── Backend (FastAPI + AI Models) ────────────────────────
   backend:
     build:
-      context: ../intrusionx-backend
+      context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8000:7860"
