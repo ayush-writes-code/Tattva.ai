@@ -5,18 +5,24 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
+    const file = formData.get("file") as File;
+    const filename = file?.name || "media_file.png";
     const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const apiKey = process.env.BACKEND_API_KEY || '';
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
 
+    const arrayBuffer = await file.arrayBuffer();
+    const newFormData = new FormData();
+    newFormData.append("file", new Blob([arrayBuffer], { type: file.type }), filename);
+
     const backendResponse = await fetch(`${apiUrl}/generate-report`, {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,
       },
-      body: formData,
+      body: newFormData,
       signal: controller.signal,
     });
 

@@ -7,15 +7,21 @@ export async function POST(req: NextRequest) {
     
     try {
       const formData = await req.formData();
+      const file = formData.get("file") as File;
+      const filename = file?.name || "media_file.png";
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 1 min timeout
+
+      const arrayBuffer = await file.arrayBuffer();
+      const newFormData = new FormData();
+      newFormData.append("file", new Blob([arrayBuffer], { type: file.type }), filename);
 
       const backendResponse = await fetch(`${apiUrl}/detect/heatmap`, {
         method: 'POST',
         headers: {
           'x-api-key': apiKey,
         },
-        body: formData,
+        body: newFormData,
         signal: controller.signal,
       });
 

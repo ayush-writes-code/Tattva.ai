@@ -22,12 +22,18 @@ export async function POST(req: NextRequest) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
 
+      // Next.js consumes the file stream when we call req.formData().
+      // To forward it via fetch safely, we must reconstruct it.
+      const arrayBuffer = await file.arrayBuffer();
+      const newFormData = new FormData();
+      newFormData.append("file", new Blob([arrayBuffer], { type: file.type }), filename);
+
       const backendResponse = await fetch(`${apiUrl}/detect/full`, {
         method: 'POST',
         headers: {
           'x-api-key': apiKey,
         },
-        body: formData,
+        body: newFormData,
         signal: controller.signal,
       });
 
