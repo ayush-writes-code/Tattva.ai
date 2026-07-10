@@ -17,12 +17,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create needed directories
-RUN mkdir -p temp outputs/reports
+RUN mkdir -p temp outputs/reports hf_cache
 
 # Create a non-root user and switch to it for security
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 USER appuser
+
+# Set Hugging Face cache directory
+ENV HF_HOME=/app/hf_cache
 
 # Expose port (Hugging Face Spaces default is 7860)
 EXPOSE 7860

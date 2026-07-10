@@ -22,7 +22,7 @@ services:
       - HF_TOKEN=${HF_TOKEN:-}  # Optional: for gated models
     restart: unless-stopped
     volumes:
-      - hf-cache:/home/appuser/.cache/huggingface
+      - hf-cache:/app/hf_cache
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860/')"]
       interval: 30s
